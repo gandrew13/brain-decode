@@ -48,7 +48,7 @@ def plot_alljoined1_montage(filenames):
 
 
 
-plot_montage("../Datasets/EEGImageNet/montage.fif")
+plot_montage("../Datasets/EEGImageNet/montage.fif")             # file taken from EEGImageNet repo
 fif_files = ["../Datasets/Alljoined1/subj01_session1_eeg.fif",
             "../Datasets/Alljoined1/subj01_session2_eeg.fif",
             "../Datasets/Alljoined1/subj02_session1_eeg.fif",
@@ -61,6 +61,6 @@ fif_files = ["../Datasets/Alljoined1/subj01_session1_eeg.fif",
             "../Datasets/Alljoined1/subj06_session1_eeg.fif",
             "../Datasets/Alljoined1/subj06_session2_eeg.fif",
             "../Datasets/Alljoined1/subj07_session1_eeg.fif",
-            "../Datasets/Alljoined1/subj08_session1_eeg.fif"]
+            "../Datasets/Alljoined1/subj08_session1_eeg.fif"]    # files taken from the AllJoined paper (check the linktree link)
 #plot_alljoined1_montage("../Datasets/Alljoined1/subj01_session1_eeg.fif")
 plot_alljoined1_montage(fif_files)
