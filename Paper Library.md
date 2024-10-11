@@ -1,6 +1,6 @@
 # Reviewed
 
-## Models:
+## Models
 https://arxiv.org/abs/2311.03764 - Neuro-GPT (EEGConformer + GPT3), pretrained on TUH, didn't have good results, probably because mental image classification data (EEGImageNet, Alljoined1) have very short EEG length (300 - 500 points)
 
 ## Datasets
