@@ -31,7 +31,11 @@ https://www.sciencedirect.com/science/article/pii/S2213158223001730             
 https://openreview.net/forum?id=QzTpTRVtrP                                                          :  LaBraM
 https://arxiv.org/abs/2404.14869                                                                    :  EEGEncoder: Advancing BCI with Transformer-Based Motor Imagery Classification
 https://arxiv.org/abs/2409.00101                                                                    :  NeuroLM: A Universal Multi-task Foundation Model for Bridging the Gap between Language and EEG Signals
-https://ieeexplore.ieee.org/abstract/document/9387339                                               :  Automatic Detection of Motor and Mental Imagery EEG Signals
+https://arxiv.org/abs/2401.18006                                                                    : EEG-GPT, 2024
+https://arxiv.org/abs/2401.10278                                                                    : EEGFormer, foundation model, 2024
+https://www.biorxiv.org/content/10.1101/2024.01.18.576245v3.full                                    : Self-supervised transformer for sleep, 2024
+
+https://ieeexplore.ieee.org/abstract/document/9387339                                               : Automatic Detection of Motor and Mental Imagery EEG Signals
 https://braindecode.org/stable/generated/braindecode.models.EEGNetv4.html                           :  EEGNet v4
 https://link.springer.com/chapter/10.1007/978-3-030-21642-9_8                                       : ChronoNet for abnormal EEG identification
 https://www.mdpi.com/1424-8220/23/13/5960                                                           : Abnormal EEG Signals Detection Using WaveNet and LSTM
@@ -43,7 +47,8 @@ https://www.frontiersin.org/journals/neuroscience/articles/10.3389/fnins.2023.11
 https://pmc.ncbi.nlm.nih.gov/articles/PMC9955721/                                                   : Subject-independent EEG classification, 2023
 https://peijin.medium.com/deep-learning-for-eegs-nad-bci-some-notes-and-some-warnings-28cfc3015a98  : DL for BCI
 https://ieeexplore.ieee.org/document/9991178                                                        : EEG Conformer (Conv transformer) for EEG decoding
-
+https://huggingface.co/evegarcianz/eega-embedding                                                   : sentence compressor
+https://huggingface.co/ms57rd/Llama-3.1-8B-quantized-EEG-TimeLLM                                    : EEG forecasting (Llama + Time-LLM)
 
 ## Surveys
 https://www.arxiv.org/abs/2410.08224                                                        : A Survey of Spatio-Temporal EEG data Analysis: from Models to Applications
@@ -53,34 +58,58 @@ https://www.frontiersin.org/journals/neuroscience/articles/10.3389/fnins.2023.12
 https://link.springer.com/article/10.1007/s00521-021-06352-5                                : EEG DL on motor imagery (2021)
 https://pmc.ncbi.nlm.nih.gov/articles/PMC7664219/                                           : EEG TL for BCI (2020)
 https://www.sciencedirect.com/science/article/pii/S093336572300252X                         : EEG DL on MI (motor imagery), 2024
+https://ieeexplore.ieee.org/abstract/document/10305163                                      : Transformers on BCI, 2023
 https://www.sciencedirect.com/science/article/pii/S0925231220314223                         : EEG TL, 2021
 https://pmc.ncbi.nlm.nih.gov/articles/PMC9200984/                                           : DL in neuroimaging
 https://www.sciencedirect.com/science/article/pii/S0925231224011251                         : Cross-subject, cross-session emotion recogniton
 https://arxiv.org/abs/1907.01332                                                            : 
 https://www.mdpi.com/2227-7080/10/4/79                                                      : ML model evaluation for EEG classification, 2022
 https://arxiv.org/abs/2203.10009                                                            : DL for EEG benchmark, 2022
+https://mindbigdata.com/opendb/2022-ACCS8%20Proceedings%20Book-81-82.pdf                    : Evaluating ML models on MindBigData
+https://www.sciencedirect.com/science/article/pii/S0925231220314223#b0740                   : EEG TL, 2021
+https://ieeexplore.ieee.org/abstract/document/9492294                                       : TL for emotion recognition, 2021
+https://www.mdpi.com/1424-8220/20/21/6321                                                   : TL for BCI
 
 ## Others (must read)
-https://arxiv.org/pdf/2403.15415                                            : EEG domain adaptation
-https://www.mdpi.com/1424-8220/19/13/2999                                   : Inter-subject modeling for EEG affect recognition
-https://arxiv.org/abs/2309.04153                                            : Mapping EEG Signals to Visual Stimuli, 2023
-https://www.sciencedirect.com/science/article/pii/S1046202321001018	        : Cross-subject EEG-based driver states awareness recognition
-https://pubmed.ncbi.nlm.nih.gov/2791314/                                    : Inter- vs intra-subject variance in topographic mapping of the EEG
-https://arxiv.org/abs/2007.06407                                            : Deep Cross-Subject Mapping of Neural Activity 
-https://arxiv.org/abs/2403.15415                                            : Physics-informed and Unsupervised Riemannian Domain Adaptation for Machine Learning on Heterogeneous EEG Datasets
-https://www.sciencedirect.com/science/article/pii/S0893608020304305         : EEG TL for MI using CNN (https://github.com/zhangks98/eeg-adapt)
-https://arxiv.org/abs/2106.03746                                            : Efficient Training of Visual Transformers with Small Datasets, 2021
-https://iopscience.iop.org/article/10.1088/1741-2552/aaf3f6/meta            : Inter-subject TL using EEG for BCI (2019)
-https://ieeexplore.ieee.org/abstract/document/8786636                       : TL MI (motor imagery) using CNNs, 2019
-https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0274847   : EEG classification + reconstruction, 2022
-https://cdn.aaai.org/ojs/6817/6817-13-10046-1-10-20200524.pdf               : Cross-Aligned Latent Embeddings for Zero-Shot Cross-Modal Retrieval
-https://arxiv.org/abs/2111.06377                                            : Masked Autoencoder are Scalable Vision Learners
-https://link.springer.com/article/10.1007/s00521-022-08178-1                : NeuroGAN (attention-based GAN for EEG image reconstruction, good for embeddings maybe), end of 2022
-https://arxiv.org/abs/2206.03950                                            : TL for decoding brain states
-https://www.mdpi.com/1424-8220/19/13/2999                                   : Combining Inter-Subject Modeling with a Subject-Based Data Transformation to Improve Affect Recognition from EEG Signals
-https://www.sciencedirect.com/science/article/pii/S105381192200163X         : EEG variability: Task-driven or subject-driven signal of interest?
-https://paperswithcode.com/sota/image-classification-on-imagenet            : SotA on ImageNet (try to apply on EEG/fMRI)
-https://paperswithcode.com/sota/image-generation-on-imagenet-256x256        : SotA on ImageNet image reconstruction (try to apply on EEG/fMRI, also use DALLE and others, VAEs, diffusion, ViT, multimodal models, CNN+Transformer etc)
+https://arxiv.org/pdf/2403.15415                                                                    : EEG domain adaptation
+https://www.mdpi.com/1424-8220/19/13/2999                                                           : Inter-subject modeling for EEG affect recognition
+https://arxiv.org/abs/2309.04153                                                                    : Mapping EEG Signals to Visual Stimuli, 2023
+https://www.sciencedirect.com/science/article/pii/S1046202321001018	                                : Cross-subject EEG-based driver states awareness recognition
+https://pubmed.ncbi.nlm.nih.gov/2791314/                                                            : Inter- vs intra-subject variance in topographic mapping of the EEG
+https://arxiv.org/abs/2007.06407                                                                    : Deep Cross-Subject Mapping of Neural Activity 
+https://arxiv.org/abs/2403.15415                                                                    : Physics-informed and Unsupervised Riemannian Domain Adaptation for Machine Learning on Heterogeneous EEG Datasets
+https://arxiv.org/abs/2408.08065                                                                    : Scalable EEG pre-processing for self-supervised learning, 2024
+https://arxiv.org/abs/2403.16540                                                                    : Cross-Dataset emotion recognition, 2024
+https://www.sciencedirect.com/science/article/pii/S1746809423009308                                 : GAN for EEG image reconstruction, 2024
+https://arxiv.org/abs/2403.07721                                                                    : EEG embedings decoding and reconstruction with guided diffusion, 2024
+https://arxiv.org/abs/2403.06532                                                                    : Reconstructing images from EEG, 2024
+https://arxiv.org/abs/2404.01250                                                                    : Image reconstruction from EEG using latent diffusion, 2024
+https://www.sciencedirect.com/science/article/abs/pii/S174680942300558X                             : Diffusion model for image reconstruction from EEG
+https://www.sciencedirect.com/science/article/pii/S1746809422008941                                 : VAE for EEG to image, 2023
+https://ieeexplore.ieee.org/abstract/document/10096587                                              : EEG2Image, 2023
+https://www.nature.com/articles/s41598-024-66228-1                                                  : low density EEG image classification and reconstruction, 2024
+https://www.sciencedirect.com/science/article/pii/S1746809420302901                                 : Hybrid TL NN for MI (motor imagery) decoding, 2021
+https://www.mdpi.com/1424-8220/21/7/2369                                                            : EEG TL for cross-subject fatigue prediction, 2021
+https://arxiv.org/abs/1907.01332                                                                    : EEG TL, 2019
+https://ieeexplore.ieee.org/abstract/document/8462115                                               : EEG TL for BCI, 2018
+https://ieeexplore.ieee.org/abstract/document/4400838                                               : Single-trial EEG source reconstruction for BCI, 2008
+https://link.springer.com/chapter/10.1007/978-3-030-83704-4_6                                       : EEG reconstruction using transformers, 2021
+https://www.frontiersin.org/journals/human-neuroscience/articles/10.3389/fnhum.2023.1194751/full    : Subject-to-subject style transfer for BCI, 2023
+https://www.sciencedirect.com/science/article/pii/S0893608020304305                                 : EEG TL for MI using CNN (https://github.com/zhangks98/eeg-adapt)
+https://arxiv.org/abs/2106.03746                                                                    : Efficient Training of Visual Transformers with Small Datasets, 2021
+https://iopscience.iop.org/article/10.1088/1741-2552/aaf3f6/meta                                    : Inter-subject TL using EEG for BCI (2019)
+https://ieeexplore.ieee.org/abstract/document/8786636                                               : TL MI (motor imagery) using CNNs, 2019
+https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0274847                           : EEG classificati`on + reconstruction, 2022
+https://cdn.aaai.org/ojs/6817/6817-13-10046-1-10-20200524.pdf                                       : Cross-Aligned Latent Embeddings for Zero-Shot Cross-Modal Retrieval
+https://arxiv.org/abs/2111.06377                                                                    : Masked Autoencoder are Scalable Vision Learners
+https://link.springer.com/article/10.1007/s00521-022-08178-1                                        : NeuroGAN (attention-based GAN for EEG image reconstruction, good for embeddings maybe), end of 2022
+https://arxiv.org/abs/2206.03950                                                                    : TL for decoding brain states
+https://www.mdpi.com/1424-8220/19/13/2999                                                           : Combining Inter-Subject Modeling with a Subject-Based Data Transformation to Improve Affect Recognition from EEG Signals
+https://github.com/ptirupat/ThoughtViz?tab=readme-ov-file                                           : ThoughtViz, thought visualizer using GANs
+https://www.sciencedirect.com/science/article/pii/S105381192200163X                                 : EEG variability: Task-driven or subject-driven signal of interest?
+https://paperswithcode.com/sota/image-classification-on-imagenet                                    : SotA on ImageNet (try to apply on EEG/fMRI)
+https://paperswithcode.com/sota/image-generation-on-imagenet-256x256                                : SotA on ImageNet image reconstruction (try to apply on EEG/fMRI, also use DALLE and others, VAEs, diffusion, ViT, multimodal models, CNN+Transformer etc) : random EEG time-series transfomer
+https://huggingface.co/JLB-JLB/EEG_TimeSeriesTransformer_336_history_96_horizon
 https://upcommons.upc.edu/bitstream/handle/2117/109756/Personalized-Image-Classification-of-EEG-Signals-using-Deep-Learning.pdf  : Image classification using simple LSTMs
 
 
