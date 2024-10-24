@@ -1,25 +1,27 @@
-# Reviewed
+# EEG
 
-## Datasets
+## Reviewed
+
+### Datasets
 https://arxiv.org/abs/2406.07151 - EEG-ImageNet dataset, biggest I have found for mental image classification.
 https://arxiv.org/abs/2404.05553 - Alljoined1 dataset (64 channels, 8 subjects)
 
-## Models
+### Models
 https://arxiv.org/abs/2311.03764 : Neuro-GPT (EEGConformer + GPT3), pretrained on TUH, didn't have good results, probably because mental image classification data (EEGImageNet, Alljoined1) have very short EEG length (300 - 500 points)
 LaBraM                           : 
 
 
 
-## Other
+### Other
 https://arxiv.org/pdf/2010.11929 : ViT
 https://arxiv.org/abs/2012.12877 : DeiT (distilled ViT using a teacher CNN)
 https://arxiv.org/abs/2106.08254 : BeiT, BERT pre-training of image transformers, uses learned visual codebook learned based on a vector quantizer
 https://arxiv.org/abs/2208.06366 : BeiTv2, 
 
 
-# To Review
+## To Review
 
-## Datasets
+### Datasets
 https://www.sciencedirect.com/science/article/pii/S1053811922008758?via%3Dihub  : EEG dataset for human visual object recognition
 https://archive.ics.uci.edu/dataset/121/eeg+database                            : EEG correlates of genetic predisposition to alcoholism (64 channels, 256Hz)
 https://mindbigdata.com/                                                        : Single-subject EEG data for image classification
@@ -27,7 +29,7 @@ https://openbci.com/community/publicly-available-eeg-datasets/                  
 https://www.sciencedirect.com/science/article/pii/S2213158223001730             : EEG pathology decoding
 
 
-## Models
+### Models
 https://openreview.net/forum?id=QzTpTRVtrP                                                          :  LaBraM
 https://arxiv.org/abs/2404.14869                                                                    :  EEGEncoder: Advancing BCI with Transformer-Based Motor Imagery Classification
 https://arxiv.org/abs/2409.00101                                                                    :  NeuroLM: A Universal Multi-task Foundation Model for Bridging the Gap between Language and EEG Signals
@@ -49,8 +51,9 @@ https://peijin.medium.com/deep-learning-for-eegs-nad-bci-some-notes-and-some-war
 https://ieeexplore.ieee.org/document/9991178                                                        : EEG Conformer (Conv transformer) for EEG decoding
 https://huggingface.co/evegarcianz/eega-embedding                                                   : sentence compressor
 https://huggingface.co/ms57rd/Llama-3.1-8B-quantized-EEG-TimeLLM                                    : EEG forecasting (Llama + Time-LLM)
+https://huggingface.co/mixedbread-ai/mxbai-embed-large-v1                                           : sentence embedding model
 
-## Surveys
+### Surveys
 https://www.arxiv.org/abs/2410.08224                                                        : A Survey of Spatio-Temporal EEG data Analysis: from Models to Applications
 https://www.sciencedirect.com/science/article/pii/S0925231224011251                         : Survey on cross-subject, cross-session EEG emotion recognition
 https://www.sciencedirect.com/science/article/pii/S0168010224000750#bib122                  : Foundation models and generative AI for neuroscience
@@ -70,7 +73,7 @@ https://www.sciencedirect.com/science/article/pii/S0925231220314223#b0740       
 https://ieeexplore.ieee.org/abstract/document/9492294                                       : TL for emotion recognition, 2021
 https://www.mdpi.com/1424-8220/20/21/6321                                                   : TL for BCI
 
-## Others (must read)
+### Others (must read)
 https://arxiv.org/pdf/2403.15415                                                                    : EEG domain adaptation
 https://www.mdpi.com/1424-8220/19/13/2999                                                           : Inter-subject modeling for EEG affect recognition
 https://arxiv.org/abs/2309.04153                                                                    : Mapping EEG Signals to Visual Stimuli, 2023
@@ -99,19 +102,69 @@ https://www.sciencedirect.com/science/article/pii/S0893608020304305             
 https://arxiv.org/abs/2106.03746                                                                    : Efficient Training of Visual Transformers with Small Datasets, 2021
 https://iopscience.iop.org/article/10.1088/1741-2552/aaf3f6/meta                                    : Inter-subject TL using EEG for BCI (2019)
 https://ieeexplore.ieee.org/abstract/document/8786636                                               : TL MI (motor imagery) using CNNs, 2019
+https://link.springer.com/article/10.1007/s11517-020-02176-y                                        : Cross-session, cross-subject TL for MI, 2020
 https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0274847                           : EEG classificati`on + reconstruction, 2022
 https://cdn.aaai.org/ojs/6817/6817-13-10046-1-10-20200524.pdf                                       : Cross-Aligned Latent Embeddings for Zero-Shot Cross-Modal Retrieval
+https://www.sciencedirect.com/science/article/pii/S0010482522000804                                 : CNN + LSTM TL for motor imagery, 2022
 https://arxiv.org/abs/2111.06377                                                                    : Masked Autoencoder are Scalable Vision Learners
 https://link.springer.com/article/10.1007/s00521-022-08178-1                                        : NeuroGAN (attention-based GAN for EEG image reconstruction, good for embeddings maybe), end of 2022
 https://arxiv.org/abs/2206.03950                                                                    : TL for decoding brain states
+https://ieeexplore.ieee.org/abstract/document/8675478                                               : Multisource TL for cross-subject emotion recognition
+https://www.frontiersin.org/journals/human-neuroscience/articles/10.3389/fnhum.2017.00334/full      : Conditional TL for emotion classification, 2017
 https://www.mdpi.com/1424-8220/19/13/2999                                                           : Combining Inter-Subject Modeling with a Subject-Based Data Transformation to Improve Affect Recognition from EEG Signals
 https://github.com/ptirupat/ThoughtViz?tab=readme-ov-file                                           : ThoughtViz, thought visualizer using GANs
 https://www.sciencedirect.com/science/article/pii/S105381192200163X                                 : EEG variability: Task-driven or subject-driven signal of interest?
 https://paperswithcode.com/sota/image-classification-on-imagenet                                    : SotA on ImageNet (try to apply on EEG/fMRI)
-https://paperswithcode.com/sota/image-generation-on-imagenet-256x256                                : SotA on ImageNet image reconstruction (try to apply on EEG/fMRI, also use DALLE and others, VAEs, diffusion, ViT, multimodal models, CNN+Transformer etc) : random EEG time-series transfomer
+https://paperswithcode.com/sota/image-generation-on-imagenet-256x256                                : SotA on ImageNet image reconstruction (try to apply on EEG/fMRI, also use DALLE and others, VAEs, diffusion, ViT, multimodal models, CNN+Transformer etc)  : random EEG time-series transfomer
 https://huggingface.co/JLB-JLB/EEG_TimeSeriesTransformer_336_history_96_horizon
 https://upcommons.upc.edu/bitstream/handle/2117/109756/Personalized-Image-Classification-of-EEG-Signals-using-Deep-Learning.pdf  : Image classification using simple LSTMs
 
 
-## Others (optional)
+### Others (optional)
 https://braindecode.org/0.7/auto_examples/plot_tuh_eeg_corpus.html          : TUH dataset processing on braindecode.org
+https://arxiv.org/abs/1609.02200                                            : Discrete VAEs
+https://huggingface.co/models?other=text-embeddings-inference&sort=trending : HuggingFace text embedding models
+
+
+# fMRI
+
+## To Review
+
+### Datasets
+https://naturalscenesdataset.org/                           : 7T fMRI, 8 subjects viewing color natural scenes
+https://www.nature.com/articles/s41597-023-02471-x          : 30 subjects, naturalistic images
+https://www.nature.com/articles/s41593-021-00962-x          : 7T, 8 subjects
+https://www.nature.com/articles/s41597-019-0052-3           : BOLD5000, 5000 images, 4 subjects
+https://openneuro.org/datasets/ds001506/versions/1.3.1      : 3 subjects (Kamitani, 2019)
+
+
+### Models
+https://www.sciencedirect.com/science/article/pii/S0893608023006470                                                     : Image reconstruction, 2024
+https://www.sciencedirect.com/science/article/pii/S0925231220301041                                                     : Alzheimer's disease (AD) using 4D fMRI, 2020
+https://github.com/KamitaniLab/DeepImageReconstruction                                                                  : Image reconstruction, 2019
+https://www.nature.com/articles/s41467-024-48114-6                                                                      : Computational reconstruction of mental representations using human behavior, 2024
+https://dr.library.brocku.ca/bitstream/handle/10464/17138/Alzheimers.pdf?sequence=1&isAllowed=y                         : AD DL
+https://arxiv.org/abs/1603.08631                                                                                        : AD CNN, 2016
+https://www.spiedigitallibrary.org/journals/journal-of-medical-imaging/volume-7/issue-5/056001/Spatiotemporal-feature-extraction-and-classification-of-Alzheimers-disease-using-deep/10.1117/1.JMI.7.5.056001.full     : AD 3D-CNN spatiotemporal extraction, 2020
+https://ieeexplore.ieee.org/abstract/document/8681247                                                                   : Behavior TL, 2019
+https://www.sciencedirect.com/science/article/pii/S2451902221003451                                                     : OCD cross-diagnosis TL, 2022
+
+
+### Reviews
+https://www.sciencedirect.com/science/article/pii/S0010482522004267                             : AD, 2022
+
+
+### Others
+https://github.com/athms/learning-from-brains                       : Self-supervised, brain dynamics, 2022
+
+
+
+# Courses
+https://www.youtube.com/watch?v=3ExL6J4BIeo&list=PLvgasosJnUVl_bt8VbERUyCLU93OG31h_                 : FSL, Oxford, 2021
+https://www.youtube.com/watch?v=ASEyg5nxj3A&list=PL7B6LR3JHY84vVSrrjdtOCRsBPz7kR7Zr&index=13        : Neurohackademy fMRI ML
+https://www.youtube.com/watch?v=KykjMNVLp6s&list=PL7B6LR3JHY84vVSrrjdtOCRsBPz7kR7Zr&index=8         : fMRI ML
+https://www.youtube.com/watch?v=3P_hN0hrp-U&list=PL7B6LR3JHY84vVSrrjdtOCRsBPz7kR7Zr&index=6         : fMRI ML
+https://www.youtube.com/watch?v=GDkLQuV4he4&list=PLfXA4opIOVrGHncHRxI3Qa5GeCSudwmxM&index=24
+
+
+
