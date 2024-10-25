@@ -148,14 +148,26 @@ https://arxiv.org/abs/1603.08631                                                
 https://www.spiedigitallibrary.org/journals/journal-of-medical-imaging/volume-7/issue-5/056001/Spatiotemporal-feature-extraction-and-classification-of-Alzheimers-disease-using-deep/10.1117/1.JMI.7.5.056001.full     : AD 3D-CNN spatiotemporal extraction, 2020
 https://ieeexplore.ieee.org/abstract/document/8681247                                                                   : Behavior TL, 2019
 https://www.sciencedirect.com/science/article/pii/S2451902221003451                                                     : OCD cross-diagnosis TL, 2022
+https://www.sciencedirect.com/science/article/pii/S016503272300928X                                                     : Depression classification using time series model for rs-fMRI, 2023
+https://link.springer.com/article/10.1007/s12559-021-09946-2                                                            : Early AD detection, 2022
+https://www.sciencedirect.com/science/article/pii/S1361841522003073                                                     : SD-CNN, 2023
+https://www.researchsquare.com/article/rs-3290143/v1                                                                    : 3DCAE-MRI, for small sample size, 2023
+https://link.springer.com/article/10.1007/S12559-019-09688-2                                                            : AD, 2020
+
 
 
 ### Reviews
 https://www.sciencedirect.com/science/article/pii/S0010482522004267                             : AD, 2022
-
+https://pmc.ncbi.nlm.nih.gov/articles/PMC10092597/                                              : DL for AD, 2022
+https://journals.sagepub.com/doi/full/10.1177/1094428118802631                                  : 2018
+https://www.igi-global.com/chapter/functional-magnetic-resonance-imaging/338978                 : 2024
+https://pmc.ncbi.nlm.nih.gov/articles/PMC10092597/#jon13063-bib-0037                            : AD, 2022
 
 ### Others
-https://github.com/athms/learning-from-brains                       : Self-supervised, brain dynamics, 2022
+https://github.com/athms/learning-from-brains                                                       : Self-supervised, brain dynamics, 2022
+https://www.sciencedirect.com/science/article/pii/S0925231223009141                                 : Multi-site, brain analysis framework, 2023
+https://www.sciencedirect.com/science/article/pii/S2213158218300329?ref=cra_js_challenge&fr=RR-1    : Cognitive deficits in infants, 2018
+
 
 
 
@@ -168,3 +180,18 @@ https://www.youtube.com/watch?v=GDkLQuV4he4&list=PLfXA4opIOVrGHncHRxI3Qa5GeCSudw
 
 
 
+# Time series
+
+## To Review
+
+### Models
+https://paperswithcode.com/paper/time-series-classification-from-scratch-with       : 2016, has code
+
+
+### Reviews
+https://arxiv.org/abs/1809.04356                                : DL for time series classification, 2018
+
+
+
+
+## Reviewed
