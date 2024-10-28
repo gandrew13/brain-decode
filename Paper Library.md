@@ -152,8 +152,10 @@ https://www.sciencedirect.com/science/article/pii/S016503272300928X             
 https://link.springer.com/article/10.1007/s12559-021-09946-2                                                            : Early AD detection, 2022
 https://www.sciencedirect.com/science/article/pii/S1361841522003073                                                     : SD-CNN, 2023
 https://www.researchsquare.com/article/rs-3290143/v1                                                                    : 3DCAE-MRI, for small sample size, 2023
+https://www.sciencedirect.com/science/article/pii/S0925231220316210#b0490                                               : brain disorder diagnosis, 2022
 https://link.springer.com/article/10.1007/S12559-019-09688-2                                                            : AD, 2020
-
+https://ieeexplore.ieee.org/document/10075201                                                                           : ML (no DL) for auditory imagination, 2022
+https://arxiv.org/abs/2305.17214v4                                                                                      : High-res image decoding from brain activity (contrast, attend, diffuse), 2023
 
 
 ### Reviews
@@ -162,6 +164,8 @@ https://pmc.ncbi.nlm.nih.gov/articles/PMC10092597/                              
 https://journals.sagepub.com/doi/full/10.1177/1094428118802631                                  : 2018
 https://www.igi-global.com/chapter/functional-magnetic-resonance-imaging/338978                 : 2024
 https://pmc.ncbi.nlm.nih.gov/articles/PMC10092597/#jon13063-bib-0037                            : AD, 2022
+https://www.frontiersin.org/journals/neuroscience/articles/10.3389/fnins.2023.1227491/full      : Brain disease, 2023
+https://www.proquest.com/docview/2294092704?fromopenview=true&parentSessionId=yyN0uFGCk6xh6u2P7XSdnxlNS0UQJSXCRIZ5R2Tj9Nw%3D&pq-origsite=gscholar&sourcetype=Scholarly%20Journals&parentSessionId=ncoEILRWHtBJhbKs8P4UYAMmKadhjJYGbATluIKeOck%3D  : cognitive impairment, 2018
 
 ### Others
 https://github.com/athms/learning-from-brains                                                       : Self-supervised, brain dynamics, 2022
