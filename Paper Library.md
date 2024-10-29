@@ -159,13 +159,18 @@ https://arxiv.org/abs/2305.17214v4                                              
 
 
 ### Reviews
-https://www.sciencedirect.com/science/article/pii/S0010482522004267                             : AD, 2022
-https://pmc.ncbi.nlm.nih.gov/articles/PMC10092597/                                              : DL for AD, 2022
-https://journals.sagepub.com/doi/full/10.1177/1094428118802631                                  : 2018
-https://www.igi-global.com/chapter/functional-magnetic-resonance-imaging/338978                 : 2024
-https://pmc.ncbi.nlm.nih.gov/articles/PMC10092597/#jon13063-bib-0037                            : AD, 2022
-https://www.frontiersin.org/journals/neuroscience/articles/10.3389/fnins.2023.1227491/full      : Brain disease, 2023
-https://www.proquest.com/docview/2294092704?fromopenview=true&parentSessionId=yyN0uFGCk6xh6u2P7XSdnxlNS0UQJSXCRIZ5R2Tj9Nw%3D&pq-origsite=gscholar&sourcetype=Scholarly%20Journals&parentSessionId=ncoEILRWHtBJhbKs8P4UYAMmKadhjJYGbATluIKeOck%3D  : cognitive impairment, 2018
+https://www.sciencedirect.com/science/article/pii/S0010482522004267                                 : AD, 2022
+https://pmc.ncbi.nlm.nih.gov/articles/PMC10092597/                                                  : DL for AD, 2022
+https://journals.sagepub.com/doi/full/10.1177/1094428118802631                                      : 2018
+https://www.igi-global.com/chapter/functional-magnetic-resonance-imaging/338978                     : 2024
+https://pmc.ncbi.nlm.nih.gov/articles/PMC10092597/#jon13063-bib-0037                                : AD, 2022
+https://www.frontiersin.org/journals/neuroscience/articles/10.3389/fnins.2023.1227491/full          : Brain disease, 2023
+https://aarlj.com/index.php/AARLJ/article/view/41                                                   : brain diseases, 2024
+https://www.proquest.com/docview/2294092704?fromopenview=true&parentSessionId=yyN0uFGCk6xh6u2P7XSdnxlNS0UQJSXCRIZ5R2Tj9Nw%3D&pq-origsite=gscholar&sourcetype=Scholarly%20Journals&parentSessionId=ncoEILRWHtBJhbKs8P4UYAMmKadhjJYGbATluIKeOck%3D      : cognitive impairment, 2018
+https://www.mdpi.com/2075-4418/13/23/3552                                                           : autism, 2023
+https://link.springer.com/article/10.1007/s42979-024-02868-4                                        : AD, 2024
+https://scholar.google.com/scholar_lookup?journal=Comput+Methods+Programs+Biomed&title=Deep+learning+to+detect+Alzheimer%27s+disease+from+neuroimaging:+a+systematic+literature+review&volume=187&publication_year=2020&pages=105242&pmid=31837630&          : AD, 2020
+https://scholar.google.com/scholar?hl=en&as_sdt=2005&sciodt=0,5&cites=10421736601670679415&scipsc=  : brain disorders diagnosis
 
 ### Others
 https://github.com/athms/learning-from-brains                                                       : Self-supervised, brain dynamics, 2022
