@@ -121,8 +121,8 @@ class LModelWrapper(L.LightningModule):
 
     def on_test_epoch_end(self):
         assert not self.model.training
-        if self.current_epoch == (self.trainer.max_epochs - 1):
-            print("Test Accuracy:", self.compute_accuracy())
+        #if self.current_epoch == (self.trainer.max_epochs - 1):
+        print("Test Accuracy:", self.compute_accuracy())
 
     def step(self, batch):
         '''
