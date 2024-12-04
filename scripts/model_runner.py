@@ -24,7 +24,7 @@ class Runner:
 
     def run(self):
         experiment_name = "%s_%s" % (self.__args.dataset, self.__args.model)
-        trainer = L.Trainer(max_epochs=1001, logger=CSVLogger("scripts/logs",  experiment_name), num_sanity_val_steps=0, enable_checkpointing=False, deterministic=True)
+        trainer = L.Trainer(max_epochs=100, logger=CSVLogger("scripts/logs",  experiment_name), num_sanity_val_steps=0, enable_checkpointing=False, deterministic=True)
         trainer.fit(model=self.model, train_dataloaders=self.dataset_loader)
         trainer.test(model=self.model, dataloaders=self.dataset_loader)
 
@@ -50,7 +50,7 @@ class Runner:
             train_losses = np.array([])
             eval_losses = np.array([])
             for line in data:
-                steps = np.append(steps, int(float(line[2])))
+                steps = np.append(steps, int(float(line[0])))
                 train_losses = np.append(train_losses, float(line[3]))
                 eval_losses = np.append(eval_losses, float(line[1]))
 
