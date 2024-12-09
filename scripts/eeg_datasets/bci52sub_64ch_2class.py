@@ -33,7 +33,7 @@ class BCI52sub_64ch_2class(EEGDataset):
 
     def __getitem__(self, index):
         eeg = self._data[index]['eeg']
-        #eeg = eeg[:, 40:440]
+        eeg = eeg[:, 2 * 512:]  # skip the 2 seconds before the cue
 
         return self._preprocess_sample(eeg, normalize=True), self._labels[index]
     
@@ -41,7 +41,8 @@ class BCI52sub_64ch_2class(EEGDataset):
         return len(self._data)
     
     def get_final_fc_length(self):
-        return 9320 # TODO: don't hardcode this, compute it based on the transformer output
+        #return 9320 # TODO: don't hardcode this, compute it based on the transformer output
+        return 6600 # TODO: don't hardcode this, compute it based on the transformer output
     
     def plot(self):
         raw = torch.tensor(self._data[0]['eeg_data']).unsqueeze(0)
