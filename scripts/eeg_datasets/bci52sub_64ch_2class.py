@@ -48,7 +48,7 @@ class BCI52sub_64ch_2class(EEGDataset):
         super().plot(raw, 1000)
     
     @staticmethod
-    def setup(dataset_path):
+    def setup(dataset_path, train_subjects, random_pretrain_subjects, valid_subj, test_subj, batch_size):
         if not os.path.isfile(dataset_path):
             BCI52sub_64ch_2class.create_ds(dataset_path)
 
@@ -56,13 +56,35 @@ class BCI52sub_64ch_2class(EEGDataset):
         with open(dataset_path, "rb") as f:
             ds = pickle.load(f)
 
-        train_ds = [sample for sample in ds if sample['subject'] != 'subject 50']
-        valid_ds = [sample for sample in ds if sample['subject'] == 'subject 50']
+        # TODO: Review this code, check it works on all cases, remove hardcoded values.
+        total_subjs = list(range(1, 53)) # subjects list 1-52
+        total_subjs.remove(32), total_subjs.remove(29)  # remove bad subjects
+        if random_pretrain_subjects == 'True':       # randomly select N subjects to train on
+            train_subjs = [random.choice(total_subjs) for _ in range(1, 26)]     # split the dataset in half, this should be a param
+            left_out_subjs = [subj for subj in total_subjs if subj not in train_subjs]
+        elif train_subjects:
+            train_subjs = [int(subj) for subj in train_subjects.split(',')]
+            left_out_subjs = [subj for subj in total_subjs if subj not in train_subjs]
+        else:
+            train_subjs = total_subjs
+            left_out_subjs = []
+
+        print("Train subjs: ", train_subjs)
+        print("Left-out subjects (for fine-tuning): ", left_out_subjs)
+
+        #train_ds = [sample for sample in ds if sample['subject'] != 'subject 50' and sample['subject'] != test_subj]
+        test_subj = int(test_subj)
+        train_ds = [sample for sample in ds if sample['subject'] in train_subjs and sample['subject'] != test_subj]
+
+        # Continue from here, implement valid and test ds subjects, push, and sync with the code on JEUWELS
+        valid_ds = [sample for sample in ds if sample['subject'] == valid_subj]
+        test_ds = [sample for sample in ds if sample['subject'] == test_subj]
 
         train_ds = BCI52sub_64ch_2class(train_ds)
         valid_ds = BCI52sub_64ch_2class(valid_ds)
+        test_ds = BCI52sub_64ch_2class(test_ds)
 
-        return EEGDataModule(train_ds, valid_ds, valid_ds, 32)
+        return EEGDataModule(train_ds, valid_ds, test_ds, batch_size)
 
     @staticmethod
     def create_ds(dataset_path):
@@ -103,15 +125,15 @@ class BCI52sub_64ch_2class(EEGDataset):
 
             #left_hand_trials = BCI52sub_64ch_2class.elim_bad_trials(left_hand_trials, eeg_data[14], 0)       # left hand
             #right_hand_trials = BCI52sub_64ch_2class.elim_bad_trials(right_hand_trials, eeg_data[14], 1)     # right hand
-            subject = False
-            left_hand_samples = [{'subject': eeg_data[13].item(), 'eeg':sample[:64], 'label': 0} for sample in left_hand_trials]
-            right_hand_samples = [{'subject': eeg_data[13].item(), 'eeg':sample[:64], 'label': 1} for sample in right_hand_trials]
+            subject = int(eeg_data[13].item().split(' ')[1])
+            left_hand_samples = [{'subject': subject, 'eeg':sample[:64], 'label': 0} for sample in left_hand_trials]
+            right_hand_samples = [{'subject': subject, 'eeg':sample[:64], 'label': 1} for sample in right_hand_trials]
             ds.extend(left_hand_samples)
             ds.extend(right_hand_samples)
             # TODO: Process the data !!! Maybe also check all datasets again, and keep only the best ones to test on
 
         random.shuffle(ds)
-        with open(dataset_path + "ds.pkl", "wb") as f:
+        with open(dataset_path, "wb") as f:
             pickle.dump(ds, f)
 
     @staticmethod

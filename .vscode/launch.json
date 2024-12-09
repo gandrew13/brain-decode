@@ -117,18 +117,27 @@
             "program": "~/Desktop/PhD/scripts/main.py",
             "console": "integratedTerminal",
             "args": [
-                     "--dataset", "bci_iv_2a",
+                     //"--dataset", "bci_iv_2a",
                      //"--dataset", "eegimagenet",
                      //"--dataset", "alljoined1",
-                     //"--dataset", "52sub_64ch_2class",
+                     "--dataset", "52sub_64ch_2class",
                      //"--model", "eegnet",
                      "--model", "eegconformer",
                      //"--model", "mlp",
-                     "--dataset_path", "Datasets/BCICIV_2a_mat/",
+                     "--dataset_path", "Datasets/52sub_64ch_2class/ds.pkl",
+                     "--batch_size", "32",
+                     "--deterministic", "True",
+                     //"--dataset_path", "Datasets/BCICIV_2a_mat/",
                      //"--dataset_path", "Datasets/EEGImageNet/EEG-ImageNet_full.pth",
                      //"--dataset_path", "Datasets/EEGImageNet/EEG-ImageNet_full.pth",
-                     //"--load_pretrained", "scripts/best_train_loss.pth.bkp",
-                     "--plot_file", "scripts/logs/bci_iv_2a_eegconformer/version_2/metrics.csv"
+                     //"--load_pretrained", "scripts/best_train_loss.pth",
+                     "--cross_validation", "False",     // run NR_SUBJECTS experiments by leaving one subject out each time
+                     "--train_subjects", "1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,30,31,33,34,35,36,37,38,39,40,41,42",  // pretrain subjects
+                     //"--train_subjects", "43,44,45,46,47,48,49,50,51,52",  // downstream subjects for fine-tuning
+                     "--random_pretrain_subjects", "False",
+                     "--valid_subject", "1",
+                     "--test_subject", "43",
+                     "--plot_file", "scripts/logs/bci_iv_2a_eegconformer/version_4/metrics.csv"
             ]
 
         },

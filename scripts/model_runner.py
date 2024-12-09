@@ -20,11 +20,12 @@ class Runner:
         self.dataset_loader = self.setup_dataset()
         self.model = LModelWrapper(self.__args.model, self.__args.load_pretrained, self.dataset_loader.get_num_classes(), self.dataset_loader.get_num_chans(), self.dataset_loader.get_final_fc_length())        
 
-        self.seed()
+        if self.__args.deterministic == 'True':
+            self.seed()
 
     def run(self):
         experiment_name = "%s_%s" % (self.__args.dataset, self.__args.model)
-        trainer = L.Trainer(max_epochs=100, logger=CSVLogger("scripts/logs",  experiment_name), num_sanity_val_steps=0, enable_checkpointing=False, deterministic=True)
+        trainer = L.Trainer(max_epochs=101, logger=CSVLogger("scripts/logs",  experiment_name), num_sanity_val_steps=0, enable_checkpointing=False, deterministic=(self.__args.deterministic == 'True'))
         trainer.fit(model=self.model, train_dataloaders=self.dataset_loader)
         trainer.test(model=self.model, dataloaders=self.dataset_loader)
 
@@ -38,7 +39,7 @@ class Runner:
             case "bci_iv_2a":
                 return BCIIV2a.setup(self.__args.dataset_path)
             case "52sub_64ch_2class":
-                return BCI52sub_64ch_2class.setup(self.__args.dataset_path)
+                return BCI52sub_64ch_2class.setup(self.__args.dataset_path, self.__args.pretrain_subjects, self.__args.random_pretrain_subjects, self.__args.valid_subject, self.__args.test_subject, self.__args.batch_size)
             case _:
                 print("Error: Unknown dataset!")
 

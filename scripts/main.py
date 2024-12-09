@@ -27,7 +27,14 @@ def parse_args() -> str:
     parser.add_argument("-d", "--dataset", required=True, help="Dataset name: [eegimagenet, alljoined1, bci_iv_2a, 52sub_64ch_2class]")
     parser.add_argument("-dp", "--dataset_path", required=False, help="Path of the dataset file")
     parser.add_argument("-m", "--model", required=True, help="Model name: [eegconformer, eegnet, mlp]")
+    parser.add_argument("-bs", "--batch_size", required=False, default=32 help="Batch size")
+    parser.add_argument("-dt", "--deterministic", required=False, default=True, help="Whether to allow randomness or make everything deterministic")
     parser.add_argument("-l", "--load_pretrained", required=False, help="Path to the pretrained model")
+    parser.add_argument("-cv", "--cross_validation", require=True, help="Run NR_SUBJECTS experiments by leaving one subject out each time")
+    parser.add_argument("-tss", "--train_subjects", required=False, help="Subjects to include in the training dataset split")
+    parser.add_argument("-rts", "--random_pretrain_subjects", required=False, help="Whether subjects in the pretraining dataset split are randomly selected or not")
+    parser.add_argument("-rts", "--valid_subject", required=True, help="Selected subject to validate on")
+    parser.add_argument("-ts", "--test_subject", required=True, help="The left-out test subject")
     parser.add_argument("-p", "--plot_file", required=False, help="Path to the results file to plot")
     #parser.add_argument("-g", "--granularity", required=False, help="choose from coarse, fine0-fine4 and all")
     #parser.add_argument("-m", "--model", required=False, help="model")
@@ -44,9 +51,15 @@ def main():
     
     args = parse_args()
 
-    runner = Runner(args)
-    runner.run()
-    runner.plot(args.plot_file)
+    train_subjects = [args.test_subject]
+    if args.cross_validation:
+        train_subjects = args.train_subjects.split(',')
+        
+    for subj in train_subjects:
+        args.test_subject = int(subj)
+        runner = Runner(args)
+        runner.run()
+        runner.plot(args.plot_file)
 
     #data_prep(args)
     #train()
