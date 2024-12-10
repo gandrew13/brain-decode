@@ -137,7 +137,7 @@
                      "--random_pretrain_subjects", "False",
                      "--valid_subject", "1",
                      "--test_subject", "43",
-                     "--plot_file", "scripts/logs/bci_iv_2a_eegconformer/version_4/metrics.csv"
+                     //"--plot_file", "scripts/logs/52sub_64ch_2class_eegconformer/version_23/metrics.csv"
             ]
 
         },
