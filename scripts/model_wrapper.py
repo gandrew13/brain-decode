@@ -43,7 +43,10 @@ class LModelWrapper(L.LightningModule):
 
         self.loss = CrossEntropyLoss()
         self.eval_loss = CrossEntropyLoss()
-        self.accuracy = Accuracy(task="multiclass", num_classes=num_classes)
+        
+        self.train_accuracy = Accuracy(task="multiclass", num_classes=num_classes)
+        self.valid_accuracy = Accuracy(task="multiclass", num_classes=num_classes)
+        self.test_accuracy = Accuracy(task="multiclass", num_classes=num_classes)
 
         self.epoch_loss = 0.0
 
@@ -106,7 +109,7 @@ class LModelWrapper(L.LightningModule):
         
         if self.current_epoch == (self.trainer.max_epochs - 1):
             # compute accuracy on last epoch
-            self.my_log_dict["train_acc"] = self.compute_accuracy()
+            self.my_log_dict["train_acc"] = self.compute_accuracy(self.train_accuracy)
             print("\nTrain Accuracy:", self.my_log_dict["train_acc"])
             
         self.batch_logits = []
@@ -115,7 +118,7 @@ class LModelWrapper(L.LightningModule):
 
     def on_validation_epoch_end(self):
         assert not self.model.training
-        self.my_log_dict["valid_acc"] = self.compute_accuracy()
+        self.my_log_dict["valid_acc"] = self.compute_accuracy(self.valid_accuracy)
         print("\nValidation Accuracy:", self.my_log_dict["valid_acc"], "\n")
         mean_loss = round(self.epoch_loss / self.trainer.num_val_batches[0], 3)
         self.my_log_dict["eval_loss"] = mean_loss
@@ -124,7 +127,7 @@ class LModelWrapper(L.LightningModule):
     def on_test_epoch_end(self):
         assert not self.model.training
         #if self.current_epoch == (self.trainer.max_epochs - 1):        
-        self.my_log_dict["test_acc"] = self.compute_accuracy()
+        self.my_log_dict["test_acc"] = self.compute_accuracy(self.test_accuracy)
         print("Test Accuracy:", self.my_log_dict["test_acc"])
 
     def step(self, batch):
@@ -137,7 +140,7 @@ class LModelWrapper(L.LightningModule):
         self.batch_logits.append(out)
         self.batch_labels.append(labels)
 
-    def compute_accuracy(self):
+    def compute_accuracy(self, metric):
         self.model.eval()
         logits = torch.argmax(torch.cat(self.batch_logits), dim=1)
         labels = torch.cat(self.batch_labels)
@@ -145,7 +148,7 @@ class LModelWrapper(L.LightningModule):
         self.batch_logits = []
         self.batch_labels = []
 
-        return round(self.accuracy(logits, labels).item(), 3)
+        return round(metric(logits, labels).item(), 3)
     
     def save_model(self):
         if self.current_epoch % 5 == 0:
