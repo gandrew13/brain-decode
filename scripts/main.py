@@ -31,6 +31,7 @@ def parse_args() -> str:
     parser.add_argument("-bs", "--batch_size", required=False, default=32, help="Batch size")
     parser.add_argument("-dt", "--deterministic", required=False, default=True, help="Whether to allow randomness or make everything deterministic")
     parser.add_argument("-l", "--load_pretrained", required=False, help="Path to the pretrained model")
+    parser.add_argument("-f", "--freeze_model", required=True, help="Whether freeze the model or not")
     parser.add_argument("-cv", "--cross_validation", required=True, help="Run NR_SUBJECTS experiments by leaving one subject out each time")
     parser.add_argument("-tss", "--train_subjects", required=False, help="Subjects to include in the training dataset split")
     parser.add_argument("-rts", "--random_pretrain_subjects", required=False, help="Whether subjects in the pretraining dataset split are randomly selected or not")

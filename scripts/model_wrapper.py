@@ -11,7 +11,7 @@ class LModelWrapper(L.LightningModule):
     '''
     PyTorch Lightning wrapper class. 
     '''
-    def __init__(self, model, pretrained_model, num_classes, num_channels, final_fc_length):
+    def __init__(self, model, pretrained_model, freeze_model, num_classes, num_channels, final_fc_length):
         super().__init__()
 
         match model:
@@ -36,10 +36,12 @@ class LModelWrapper(L.LightningModule):
         if pretrained_model:
             self.model.load_state_dict(load(pretrained_model))
 
-        # TODO: freeze all except linear layers
+        if freeze_model:
+            self.freeze()
+
         #for name, params in self.model.named_parameters():
         #    if "fc" not in name:
-        #        params.requires_grad = False
+        #       params.requires_grad = False
 
         self.loss = CrossEntropyLoss()
         self.eval_loss = CrossEntropyLoss()
