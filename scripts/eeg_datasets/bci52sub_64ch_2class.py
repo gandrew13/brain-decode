@@ -72,9 +72,12 @@ class BCI52sub_64ch_2class(EEGDataset):
 
         print("Train subjs: ", train_subjs)
         print("Left-out subjects (for fine-tuning): ", left_out_subjs)
+        print("Valid subject: ", valid_subj)
+        print("Test subject: ", test_subj)
 
         #train_ds = [sample for sample in ds if sample['subject'] != 'subject 50' and sample['subject'] != test_subj]
         test_subj = int(test_subj)
+        valid_subj = int(valid_subj)
         train_ds = [sample for sample in ds if sample['subject'] in train_subjs and sample['subject'] != test_subj]
 
         # Continue from here, implement valid and test ds subjects, push, and sync with the code on JEUWELS
@@ -85,7 +88,7 @@ class BCI52sub_64ch_2class(EEGDataset):
         valid_ds = BCI52sub_64ch_2class(valid_ds)
         test_ds = BCI52sub_64ch_2class(test_ds)
 
-        return EEGDataModule(train_ds, valid_ds, test_ds, batch_size)
+        return EEGDataModule(train_ds, valid_ds, test_ds, int(batch_size))
 
     @staticmethod
     def create_ds(dataset_path):

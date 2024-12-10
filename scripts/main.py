@@ -51,12 +51,13 @@ def main():
     
     args = parse_args()
 
-    train_subjects = [args.test_subject]
-    if args.cross_validation:
-        train_subjects = args.train_subjects.split(',')
+    test_subjects = [args.test_subject]
+    if args.cross_validation == 'True':
+        test_subjects = args.train_subjects.split(',')
         
-    for subj in train_subjects:
-        args.test_subject = int(subj)
+    for subj in test_subjects:
+        print("\n\n===================================== NEW RUN ==========================================")
+        args.test_subject = subj
         runner = Runner(args)
         runner.run()
         runner.plot(args.plot_file)
