@@ -125,6 +125,7 @@
                      "--model", "eegconformer",
                      //"--model", "mlp",
                      "--dataset_path", "Datasets/52sub_64ch_2class/ds.pkl",
+                     "--epochs", "101",
                      "--batch_size", "32",
                      "--deterministic", "True",
                      //"--dataset_path", "Datasets/BCICIV_2a_mat/",

@@ -27,6 +27,7 @@ def parse_args() -> str:
     parser.add_argument("-d", "--dataset", required=True, help="Dataset name: [eegimagenet, alljoined1, bci_iv_2a, 52sub_64ch_2class]")
     parser.add_argument("-dp", "--dataset_path", required=False, help="Path of the dataset file")
     parser.add_argument("-m", "--model", required=True, help="Model name: [eegconformer, eegnet, mlp]")
+    parser.add_argument("-e", "--epochs", required=True, help="Number of epochs to train the model for")
     parser.add_argument("-bs", "--batch_size", required=False, default=32, help="Batch size")
     parser.add_argument("-dt", "--deterministic", required=False, default=True, help="Whether to allow randomness or make everything deterministic")
     parser.add_argument("-l", "--load_pretrained", required=False, help="Path to the pretrained model")
