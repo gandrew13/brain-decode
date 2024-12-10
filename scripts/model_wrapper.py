@@ -51,7 +51,7 @@ class LModelWrapper(L.LightningModule):
 
         #self.batch_results = {"train_batch_logits": [], "train_batch_labels": [], "valid_batch_logits": [], "valid_batch_labels": []}
 
-        self.my_log_dict = {"epoch": -1, "train_loss": 1000.0, "eval_loss": 1000.0}
+        self.my_log_dict = {"epoch": -1, "train_loss": 1000.0, "eval_loss": 1000.0, "train_acc": -1.0, "eval_acc": -1.0, "test_acc": -1.0}
 
         self.batch_logits = []
         self.batch_labels = []
@@ -106,23 +106,26 @@ class LModelWrapper(L.LightningModule):
         
         if self.current_epoch == (self.trainer.max_epochs - 1):
             # compute accuracy on last epoch
-            print("\nTrain Accuracy:", self.compute_accuracy())
-
+            self.my_log_dict["train_acc"] = self.compute_accuracy()
+            print("\nTrain Accuracy:", self.my_log_dict["train_acc"])
+            
         self.batch_logits = []
         self.batch_labels = []
 
 
     def on_validation_epoch_end(self):
         assert not self.model.training
-        print("\nValidation Accuracy:", self.compute_accuracy(), "\n")
+        self.my_log_dict["valid_acc"] = self.compute_accuracy()
+        print("\nValidation Accuracy:", self.my_log_dict["valid_acc"], "\n")
         mean_loss = round(self.epoch_loss / self.trainer.num_val_batches[0], 3)
         self.my_log_dict["eval_loss"] = mean_loss
         self.epoch_loss = 0.0
 
     def on_test_epoch_end(self):
         assert not self.model.training
-        #if self.current_epoch == (self.trainer.max_epochs - 1):
-        print("Test Accuracy:", self.compute_accuracy())
+        #if self.current_epoch == (self.trainer.max_epochs - 1):        
+        self.my_log_dict["test_acc"] = self.compute_accuracy()
+        print("Test Accuracy:", self.my_log_dict["test_acc"])
 
     def step(self, batch):
         '''
@@ -145,8 +148,8 @@ class LModelWrapper(L.LightningModule):
         return round(self.accuracy(logits, labels).item(), 3)
     
     def save_model(self):
-        if self.current_epoch % 10 == 0:
+        if self.current_epoch % 5 == 0:
             if self.prev_losses["prev_train_loss"] > self.epoch_loss:
                 print("Saving model...")
-                save(self.model.state_dict(), "scripts/best_train_loss.pth")
+                save(self.model.state_dict(), self.logger.log_dir + "/best_train_loss.pth")
                 self.prev_losses["prev_train_loss"] = self.epoch_loss
