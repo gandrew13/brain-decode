@@ -18,7 +18,7 @@ class Runner:
         self.__args = args
 
         self.dataset_loader = self.setup_dataset()
-        self.model = LModelWrapper(self.__args.model, self.__args.load_pretrained, self.__args.fine_tune == 'True', self.__args.freeze_model == 'True', self.dataset_loader.get_num_classes(), self.dataset_loader.get_num_chans(), self.dataset_loader.get_final_fc_length())        
+        self.model = LModelWrapper(self.__args.model, self.__args.load_pretrained, int(self.__args.fine_tune_mode), self.__args.freeze_model == 'True', self.dataset_loader.get_num_classes(), self.dataset_loader.get_num_chans(), self.dataset_loader.get_final_fc_length())        
 
         if self.__args.deterministic == 'True':
             self.seed()
@@ -28,7 +28,7 @@ class Runner:
         trainer = L.Trainer(max_epochs=int(self.__args.epochs), logger=CSVLogger("scripts/logs",  experiment_name), num_sanity_val_steps=0, enable_checkpointing=False, deterministic=(self.__args.deterministic == 'True'))
         trainer.fit(model=self.model, train_dataloaders=self.dataset_loader)
         trainer.test(model=self.model, dataloaders=self.dataset_loader)
-
+        self.plot(self.__args.plot_file)
 
     def setup_dataset(self):
         match self.__args.dataset:
@@ -44,6 +44,8 @@ class Runner:
                 print("Error: Unknown dataset!")
 
     def plot(self, file):
+        if not file:
+            return
         with open(file, mode ='r') as f:
             data = csv.reader(f)
             next(iter(data)) # skip header

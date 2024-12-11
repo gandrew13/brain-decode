@@ -11,7 +11,7 @@ class LModelWrapper(L.LightningModule):
     '''
     PyTorch Lightning wrapper class. 
     '''
-    def __init__(self, model, pretrained_model, freeze_model, fine_tune, num_classes, num_channels, final_fc_length):
+    def __init__(self, model, pretrained_model, freeze_model, fine_tune_mode, num_classes, num_channels, final_fc_length):
         super().__init__()
 
         match model:
@@ -152,17 +152,25 @@ class LModelWrapper(L.LightningModule):
 
         return round(metric(logits, labels).item(), 3)
     
-    def freeze(self, fine_tune):
-        if not fine_tune:
-            self.freeze()
-        else:
-            for name, params in self.model.named_parameters():
-                self.model.final_layer
-                if "final_layer" not in name:
+    def freeze(self, fine_tune_mode):
+        excluded_layers = [] 
+        match fine_tune_mode:
+            case 1:
+                self.freeze()
+            case 2:
+                excluded_layers = ["final_layer"]
+            case 3:
+                excluded_layers = ["final_layer", "fc"]
+            case _:
+                return # do nothing
+            
+        for name, params in self.model.named_parameters():
+                should_freeze = [layer_type in name for layer_type in excluded_layers]
+                if len(should_freeze) == 0:
                     params.requires_grad = False
                 else:
                     print(name)
-    
+
     def save_model(self):
         if self.current_epoch % 5 == 0:
             if self.prev_losses["prev_train_loss"] > self.epoch_loss:
