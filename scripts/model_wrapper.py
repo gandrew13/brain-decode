@@ -11,7 +11,7 @@ class LModelWrapper(L.LightningModule):
     '''
     PyTorch Lightning wrapper class. 
     '''
-    def __init__(self, model, pretrained_model, freeze_model, num_classes, num_channels, final_fc_length):
+    def __init__(self, model, pretrained_model, freeze_model, fine_tune, num_classes, num_channels, final_fc_length):
         super().__init__()
 
         match model:
@@ -151,6 +151,17 @@ class LModelWrapper(L.LightningModule):
         self.batch_labels = []
 
         return round(metric(logits, labels).item(), 3)
+    
+    def freeze(self, fine_tune):
+        if not fine_tune:
+            self.freeze()
+        else:
+            for name, params in self.model.named_parameters():
+                self.model.final_layer
+                if "final_layer" not in name:
+                    params.requires_grad = False
+                else:
+                    print(name)
     
     def save_model(self):
         if self.current_epoch % 5 == 0:

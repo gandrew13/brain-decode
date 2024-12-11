@@ -18,7 +18,7 @@ class Runner:
         self.__args = args
 
         self.dataset_loader = self.setup_dataset()
-        self.model = LModelWrapper(self.__args.model, self.__args.load_pretrained == 'True', self.__args.freeze_model == 'True', self.dataset_loader.get_num_classes(), self.dataset_loader.get_num_chans(), self.dataset_loader.get_final_fc_length())        
+        self.model = LModelWrapper(self.__args.model, self.__args.load_pretrained, self.__args.fine_tune == 'True', self.__args.freeze_model == 'True', self.dataset_loader.get_num_classes(), self.dataset_loader.get_num_chans(), self.dataset_loader.get_final_fc_length())        
 
         if self.__args.deterministic == 'True':
             self.seed()
