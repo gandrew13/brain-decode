@@ -1,4 +1,5 @@
 import argparse
+import gc
 from model_runner import Runner
 
 
@@ -32,7 +33,7 @@ def parse_args() -> str:
     parser.add_argument("-dt", "--deterministic", required=False, default=True, help="Whether to allow randomness or make everything deterministic")
     parser.add_argument("-l", "--load_pretrained", required=False, help="Path to the pretrained model")
     parser.add_argument("-f", "--freeze_model", required=True, help="Whether freeze the model or not")
-    parser.add_argument("-ft", "--fine_tune", required=False, default=False, help="Whether to freeze or train the classification layers")
+    parser.add_argument("-ft", "--fine_tune_mode", required=False, default='0', help="1 - full freeze, 2 - unfreeze classification layer, 3 - unfreeze all FC layers")
     parser.add_argument("-cv", "--cross_validation", required=True, help="Run NR_SUBJECTS experiments by leaving one subject out each time")
     parser.add_argument("-tss", "--train_subjects", required=False, help="Subjects to include in the training dataset split")
     parser.add_argument("-rts", "--random_pretrain_subjects", required=False, help="Whether subjects in the pretraining dataset split are randomly selected or not")
@@ -54,6 +55,7 @@ def main():
     
     args = parse_args()
 
+    #test_subjects = filter(len, args.test_subject.split(','))
     test_subjects = [args.test_subject]
     if args.cross_validation == 'True':
         test_subjects = args.train_subjects.split(',')
@@ -63,7 +65,8 @@ def main():
         args.test_subject = subj
         runner = Runner(args)
         runner.run()
-        runner.plot(args.plot_file)
+        del runner
+        gc.collect()
 
     #data_prep(args)
     #train()
