@@ -33,15 +33,16 @@ class LModelWrapper(L.LightningModule):
             case _:
                 print("Error: Unknown model!")
 
+        self.__pretrained_model = pretrained_model
         if pretrained_model:
-            self.model.load_state_dict(load(pretrained_model))
+            self.__checkpoint = load(pretrained_model)
+            if "model" in self.__checkpoint:
+                self.model.load_state_dict(self.__checkpoint["model"])
+            else:
+                self.model.load_state_dict(self.__checkpoint)
 
         if freeze_model:
-            self.freeze()
-
-        #for name, params in self.model.named_parameters():
-        #    if "fc" not in name:
-        #       params.requires_grad = False
+            self.freeze(fine_tune_mode)
 
         self.loss = CrossEntropyLoss()
         self.eval_loss = CrossEntropyLoss()
@@ -52,7 +53,7 @@ class LModelWrapper(L.LightningModule):
 
         self.epoch_loss = 0.0
 
-        self.prev_losses = {"prev_train_loss": 10000.0, "prev_eval_loss": 100000.0}
+        self.prev_losses = {"prev_train_loss": self.__checkpoint["prev_train_loss"] if pretrained_model and "prev_train_loss" in self.__checkpoint else 100000.0, "prev_eval_loss": 100000.0}
 
         #self.batch_results = {"train_batch_logits": [], "train_batch_labels": [], "valid_batch_logits": [], "valid_batch_labels": []}
 
@@ -83,7 +84,10 @@ class LModelWrapper(L.LightningModule):
         self.step(batch)
 
     def configure_optimizers(self):
-        return optim.AdamW(self.parameters(), lr=1e-3)
+        opt = optim.AdamW(self.parameters(), lr=1e-3)
+        if self.__pretrained_model and "optimizer" in self.__checkpoint:
+            opt.load_state_dict(self.__checkpoint["optimizer"])
+        return opt
         #return optim.SGD(self.parameters(), lr=0.01, weight_decay=0.001, momentum=0.9)
         #return optim.SGD(self.parameters(), lr=1e-2, weight_decay=1e-3, momentum=0.9)
     
@@ -165,15 +169,20 @@ class LModelWrapper(L.LightningModule):
                 return # do nothing
             
         for name, params in self.model.named_parameters():
-                should_freeze = [layer_type in name for layer_type in excluded_layers]
-                if len(should_freeze) == 0:
-                    params.requires_grad = False
-                else:
-                    print(name)
+            should_freeze = [layer_type in name for layer_type in excluded_layers]
+            if len(should_freeze) == 0:
+                params.requires_grad = False
+            else:
+                print(name)
 
     def save_model(self):
         if self.current_epoch % 5 == 0:
             if self.prev_losses["prev_train_loss"] > self.epoch_loss:
                 print("Saving model...")
-                save(self.model.state_dict(), self.logger.log_dir + "/best_train_loss.pth")
+                checkpoint = {
+                    "prev_train_loss": self.epoch_loss, 
+                    "model":  self.model.state_dict(),
+                    "optimizer": self.optimizers().state_dict()
+                }
+                save(checkpoint, self.logger.log_dir + "/best_train_loss.pth")
                 self.prev_losses["prev_train_loss"] = self.epoch_loss
