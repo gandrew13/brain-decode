@@ -160,7 +160,7 @@ class LModelWrapper(L.LightningModule):
         excluded_layers = [] 
         match fine_tune_mode:
             case 1:
-                self.freeze()
+                super().freeze()
             case 2:
                 excluded_layers = ["final_layer"]
             case 3:
