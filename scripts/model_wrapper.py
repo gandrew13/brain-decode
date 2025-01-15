@@ -161,10 +161,13 @@ class LModelWrapper(L.LightningModule):
         match fine_tune_mode:
             case 1:
                 super().freeze()
+                print("Freezing full model!")
             case 2:
                 excluded_layers = ["final_layer"]
+                print("Freezing final layer!")
             case 3:
                 excluded_layers = ["final_layer", "fc"]
+                print("Freezing all FC!")
             case _:
                 return # do nothing
             
