@@ -4,9 +4,14 @@ Datasets/EEGImageNet/*.pth
 Datasets/52sub_64ch_2class/*.mat
 Datasets/BCICIV_2a_mat/*.mat
 Datasets/BCICIV_2a_mat/*.gdf
+Datasets/52sub_64ch_2class/*
+Datasets/54sub_62ch_2class/*
+Datasets/Alljoined1/*.fif
 
 .torcheeg/
 
 scripts/best_train_loss.pth
 scripts/best_train_loss.pth.bkp
 scripts/logs/*/*/hparams.yaml
+scripts/logs/*/*/best_train_loss.pth
+
