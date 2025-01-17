@@ -82,7 +82,8 @@ class BCI52sub_64ch_2class(EEGDataset):
         #train_ds = [sample for sample in ds if sample['subject'] != 'subject 50' and sample['subject'] != test_subj]
         test_subj = int(test_subj)
         valid_subj = int(valid_subj)
-        train_ds = [sample for sample in ds if sample['subject'] in train_subjs and sample['subject'] != test_subj]
+        #train_ds = [sample for sample in ds if sample['subject'] in train_subjs and sample['subject'] != test_subj]
+        train_ds = [sample for sample in ds if sample['subject'] in train_subjs] # don't exclude the test subject from training, we're training on the entire dataset for TL
 
         # Continue from here, implement valid and test ds subjects, push, and sync with the code on JEUWELS
         valid_ds = [sample for sample in ds if sample['subject'] == valid_subj]
