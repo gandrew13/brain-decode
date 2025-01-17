@@ -33,13 +33,16 @@ class LModelWrapper(L.LightningModule):
             case _:
                 print("Error: Unknown model!")
 
+        #for name, param in self.model.state_dict().items():
+        #    print(name, param.shape)
+
         self.__pretrained_model = pretrained_model
         if pretrained_model:
             self.__checkpoint = load(pretrained_model)
             if "model" in self.__checkpoint:
-                self.model.load_state_dict(self.__checkpoint["model"])
+                self.load_weights(self.__checkpoint["model"])
             else:
-                self.model.load_state_dict(self.__checkpoint)
+                self.load_weights(self.__checkpoint)
 
         if freeze_model:
             self.freeze(fine_tune_mode)
@@ -85,8 +88,8 @@ class LModelWrapper(L.LightningModule):
 
     def configure_optimizers(self):
         opt = optim.AdamW(self.parameters(), lr=1e-3)
-        if self.__pretrained_model and "optimizer" in self.__checkpoint:
-            opt.load_state_dict(self.__checkpoint["optimizer"])
+        #if self.__pretrained_model and "optimizer" in self.__checkpoint:
+            #opt.load_state_dict(self.__checkpoint["optimizer"])        # TODO: Re-enable this, load optimize state
         return opt
         #return optim.SGD(self.parameters(), lr=0.01, weight_decay=0.001, momentum=0.9)
         #return optim.SGD(self.parameters(), lr=1e-2, weight_decay=1e-3, momentum=0.9)
@@ -155,6 +158,19 @@ class LModelWrapper(L.LightningModule):
         self.batch_labels = []
 
         return round(metric(logits, labels).item(), 3)
+    
+    def load_weights(self, state_dict):
+        own_state = self.model.state_dict()
+        for name, param in state_dict.items():
+            print(name, param.shape)
+            if name not in own_state:
+                raise "Error: Discrepance between loaded pretrained weights and model weights."  
+            if "fc.fc" in name:
+                continue
+            if isinstance(param, torch.nn.Parameter):
+                # backwards compatibility for serialized parameters
+                param = param.data
+            own_state[name].copy_(param)
     
     def freeze(self, fine_tune_mode):
         excluded_layers = [] 
