@@ -4,6 +4,7 @@ import glob
 import scipy.io
 import pickle
 from scipy.signal import resample
+#from concurrent.futures import ThreadPoolExecutor
 
 from .eegdataset import EEGDataset, EEGDataModule, np, torch
 
@@ -116,105 +117,117 @@ class BCI2019(EEGDataset):
         Creates a single dataset file out of all the subject files.
         Currently just reads one .mat file (one session of an object)
         '''
-
         ds = []
-        for subj_file in glob.glob(dataset_path + "*.mat"):
-            subj_data = scipy.io.loadmat(subj_file)
-            train_data = subj_data['EEG_MI_train'].item()
-            test_data = subj_data['EEG_MI_test'].item()
+        files = list(glob.glob(dataset_path + "*.mat"))
+        [ds.extend(BCI2019.process_file(file, dataset_path)) for file in files]
 
-            assert np.array_equal(train_data[8], test_data[8])    # check train and test data have the exact same channels
-            
-            if print_ch_names:
-                BCI2019.print_channel_names(train_data[8][0])  # 8 = index of the channel names
-
-            train_labels = train_data[5][0]
-            test_labels = test_data[5][0]
-
-            train_data = np.transpose(train_data[0], (1, 2, 0))   # (seq_len, trials, channels) -> (trials, channels, seq_len)
-            test_data = np.transpose(test_data[0], (1, 2, 0))
-
-            train_data, test_data = BCI2019.filter_channels([train_data, test_data],
-                                        ['FP1', 'FP2', 'F7', 'F3', 'FZ', 'F4', 'F8', 'FC5', 'FC1', 'FC2', 'FC6', 'T7', 'C3', 'CZ', 'C4', 'T8', 'TP9', 'CP5', 'CP1', 'CP2', 'CP6', 'TP10', 'P7', 'P3', 'PZ', 'P4', 'P8', 'PO9', 'O1', 'OZ', 'O2', 'PO10', 'FC3', 'FC4', 'C5', 'C1', 'C2', 'C6', 'CP3', 'CPZ', 'CP4', 'P1', 'P2', 'POZ', 'FT9', 'FTT9h', 'TTP7h', 'TP7', 'TPP9h', 'FT10', 'FTT10h', 'TPP8h', 'TP8', 'TPP10h', 'F9', 'F10', 'AF7', 'AF3', 'AF4', 'AF8', 'PO3', 'PO4'],
-                                        #['FP1', 'FP2', 'F7', 'F3', 'FZ', 'F4', 'F8', 'FC5', 'FC1', 'FC2', 'FC6', 'T7', 'C3', 'CZ', 'C4', 'T8', 'CP5', 'CP1', 'CP2', 'CP6', 'P7', 'P3', 'PZ', 'P4', 'P8', 'PO9', 'O1', 'OZ', 'O2', 'PO10', 'FC3', 'FC4', 'C5', 'C1', 'C2', 'C6', 'CP3', 'CPZ', 'CP4', 'P1', 'P2', 'POZ', 'FT9', 'TP7', 'FT10', 'TP8', 'F9', 'F10', 'AF7', 'AF3', 'AF4', 'AF8', 'PO3', 'PO4'])
-                                        ['FP1', 'FP2', 'F7', 'F3', 'FZ', 'F4', 'F8', 'FC5', 'FC1', 'FC2', 'FC6', 'T7', 'C3', 'CZ', 'C4', 'T8', 'CP5', 'CP1', 'CP2', 'CP6', 'P7', 'P3', 'PZ', 'P4', 'P8', 'O1', 'OZ', 'O2', 'FC3', 'FC4', 'C5', 'C1', 'C2', 'C6', 'CP3', 'CPZ', 'CP4', 'P1', 'P2', 'POZ', 'TP7', 'TP8', 'AF7', 'AF3', 'AF4', 'AF8', 'PO3', 'PO4'])       # common channels to 2017 and 2019 datasets 
-            
-            # Mapping 1 (2019 -> 2017 datasets)
-            # FP1 = FP1
-            # FP2 = FP2
-            # NZ (missing) = FPZ
-            # AF7 = AF7
-            # AF3 = AF3
-            # AFZ = AFZ
-            # AF4 = AF4
-            # AF8 = AF8
-            # F9, F7, F3 = F7, F5, F3
-            # FZ = FZ
-            # F4, F8, F10 = F4, F6, F8
-            # FT9, FC5, FC3, FC1 = FT7, FC5, FC3, FC1
-            # Missing = FCZ
-            # FC2, FC4, FC6, FT10 = FC2, FC4, FC6, FT8 
-            # T7, C5, C3, C1 = T7, C5, C3, C1
-            # CZ = CZ
-            # C2, C4, C6, T8 = C2, C4, C6, T8
-            # TP9 = None
-            # TP7, CP5, CP3, CP1 = TP7, CP5, CP3, CP1
-            # CPZ = CPZ
-            # CP2, CP4, CP6, TP8 = CP2, CP4, CP6, TP8
-            # TP10 = None
-            # P7 = P7
-            # Missing = P5
-            # P3, P1 = P3, P1
-            # PZ = PZ
-            # P2, P4 = P2, P4
-            # Missing = P6
-            # P8 = P8
-            # PO3, POZ, PO4 = PO3, POZ, PO4
-            # O1, OZ, O2, = O1, OZ, O2
-            # PO9 = P9
-            # PO10 = P10
-            # Missing = IZ
-
-            # Mapping 2 (2019 -> 2017 datasets) correct and current
-            # FP1 = FP1
-            # FP2 = FP2
-            # NZ (missing) = FPZ
-            # AF7 = AF7
-            # AF3 = AF3
-            # AFZ = AFZ
-            # AF4 = AF4
-            # AF8 = AF8
-            # F9 = Missing
-            # F7, NONE, F3, NONE, FZ, NONE, F4, NONE, F8 = F7, F5, F3, F1, FZ, F2, F4, F6, F8
-            # F10 = Missing
-            # FT9, FT10 = Missing, Missing
-            # NONE, FC5, FC3, FC1, NONE, FC2, FC4, FC6, NONE = FT7, FC5, FC3, FC1, FCZ, FC2, FC4, FC6, FT8
-            # T7, C5, C3, C1 = T7, C5, C3, C1
-            # CZ = CZ
-            # C2, C4, C6, T8 = C2, C4, C6, T8
-            # TP9, TP10 = NONE, NONE
-            # TP7, CP5, CP3, CP1, CPZ, CP2, CP4, CP6, TP8 = TP7, CP5, CP3, CP1, CPZ, CP2, CP4, CP6, TP8
-            # NONE, P7, NONE, P3, P1, PZ, P2, P4, NNE, P8, NONE = P9, P7, P5, P3, P1, PZ, P2, PZ, P6, P8, P10
-            # NONE, PO3, POZ, PO4, NONE = PO7, PO3, POZ, PO4, PO8
-            # O1, OZ, O2 = O1, OZ, O2
-            # PO9, PO10 = NONE, NONE
-
-            train_data, test_data = BCI2019.reorder_channels([train_data, test_data],
-                                                  ['FP1', 'FP2', 'F7', 'F3', 'FZ', 'F4', 'F8', 'FC5', 'FC1', 'FC2', 'FC6', 'T7', 'C3', 'CZ', 'C4', 'T8', 'CP5', 'CP1', 'CP2', 'CP6', 'P7', 'P3', 'PZ', 'P4', 'P8', 'O1', 'OZ', 'O2', 'FC3', 'FC4', 'C5', 'C1', 'C2', 'C6', 'CP3', 'CPZ', 'CP4', 'P1', 'P2', 'POZ', 'TP7', 'TP8', 'AF7', 'AF3', 'AF4', 'AF8', 'PO3', 'PO4'],
-                                                  #['FP1', 'AF7', 'AF3', 'F3', 'F7', 'F9', 'FT7', 'FC5', 'FC3', 'FC1', 'C1', 'C3', 'C5', 'T7', 'TP7', 'CP5', 'CP3', 'CP1', 'P1', 'P3', 'P5', 'P7', 'P9', 'PO7', 'PO3', 'O1', 'OZ', 'POZ', 'PZ', 'CPZ', 'FPZ', 'FP2', 'AF8', 'AF4', 'AFZ', 'FZ', 'F2', 'F4', 'F6', 'F8', 'FT8', 'FC6', 'FC4', 'FC2', 'FCZ', 'CZ', 'C2', 'C4', 'C6', 'T8', 'TP8', 'CP6', 'CP4', 'CP2', 'P2', 'P4', 'P6', 'P8', 'P10', 'PO8', 'PO4', 'O2']) # for TL purposes
-                                                  ['FP1', 'AF7', 'AF3', 'F3', 'F7', 'FC5', 'FC3', 'FC1', 'C1', 'C3', 'C5', 'T7', 'TP7', 'CP5', 'CP3', 'CP1', 'P1', 'P3', 'P7', 'PO3', 'O1', 'OZ', 'POZ', 'PZ', 'CPZ', 'FP2', 'AF8', 'AF4', 'FZ', 'F4', 'F8', 'FC6', 'FC4', 'FC2', 'CZ', 'C2', 'C4', 'C6', 'T8', 'TP8', 'CP6', 'CP4', 'CP2', 'P2', 'P4', 'P8', 'PO4', 'O2']) # for TL purposes, same order as 2017 source dataset
+        with open(dataset_path + "ds.pkl", "ab") as f:
+            pickle.dump(ds, f, pickle.HIGHEST_PROTOCOL)
         
-            train_data, test_data = BCI2019.downsample([train_data, test_data], 512, 1000)
-            
-            subj_nr = BCI2019.get_subj_name(subj_file)
-            
-            train_samples = [{'subject': subj_nr, 'eeg':trial, 'label': train_labels[i], "split": "train"} for i, trial in enumerate(train_data)]
-            test_samples = [{'subject': subj_nr, 'eeg':trial, 'label': test_labels[i], "split": "test"} for i, trial in enumerate(test_data)]
-            
-            ds.extend(train_samples)
-            ds.extend(test_samples)
+        #with ThreadPoolExecutor(max_workers=8) as threads:
+        #    t_res = threads.map(BCI2019.process_file, files)
         
+    @staticmethod
+    def process_file(subj_file, dataset_path = "", print_ch_names = False):
+        print("Processing file: ", subj_file)
+        subj_data = scipy.io.loadmat(subj_file)
+        train_data = subj_data['EEG_MI_train'].item()
+        test_data = subj_data['EEG_MI_test'].item()
+
+        assert np.array_equal(train_data[8], test_data[8])    # check train and test data have the exact same channels
+        
+        if print_ch_names:
+            BCI2019.print_channel_names(train_data[8][0])  # 8 = index of the channel names
+
+        train_labels = train_data[5][0]
+        test_labels = test_data[5][0]
+
+        train_data = np.transpose(train_data[0], (1, 2, 0))   # (seq_len, trials, channels) -> (trials, channels, seq_len)
+        test_data = np.transpose(test_data[0], (1, 2, 0))
+
+        train_data, test_data = BCI2019.filter_channels([train_data, test_data],
+                                    ['FP1', 'FP2', 'F7', 'F3', 'FZ', 'F4', 'F8', 'FC5', 'FC1', 'FC2', 'FC6', 'T7', 'C3', 'CZ', 'C4', 'T8', 'TP9', 'CP5', 'CP1', 'CP2', 'CP6', 'TP10', 'P7', 'P3', 'PZ', 'P4', 'P8', 'PO9', 'O1', 'OZ', 'O2', 'PO10', 'FC3', 'FC4', 'C5', 'C1', 'C2', 'C6', 'CP3', 'CPZ', 'CP4', 'P1', 'P2', 'POZ', 'FT9', 'FTT9h', 'TTP7h', 'TP7', 'TPP9h', 'FT10', 'FTT10h', 'TPP8h', 'TP8', 'TPP10h', 'F9', 'F10', 'AF7', 'AF3', 'AF4', 'AF8', 'PO3', 'PO4'],
+                                    #['FP1', 'FP2', 'F7', 'F3', 'FZ', 'F4', 'F8', 'FC5', 'FC1', 'FC2', 'FC6', 'T7', 'C3', 'CZ', 'C4', 'T8', 'CP5', 'CP1', 'CP2', 'CP6', 'P7', 'P3', 'PZ', 'P4', 'P8', 'PO9', 'O1', 'OZ', 'O2', 'PO10', 'FC3', 'FC4', 'C5', 'C1', 'C2', 'C6', 'CP3', 'CPZ', 'CP4', 'P1', 'P2', 'POZ', 'FT9', 'TP7', 'FT10', 'TP8', 'F9', 'F10', 'AF7', 'AF3', 'AF4', 'AF8', 'PO3', 'PO4'])
+                                    ['FP1', 'FP2', 'F7', 'F3', 'FZ', 'F4', 'F8', 'FC5', 'FC1', 'FC2', 'FC6', 'T7', 'C3', 'CZ', 'C4', 'T8', 'CP5', 'CP1', 'CP2', 'CP6', 'P7', 'P3', 'PZ', 'P4', 'P8', 'O1', 'OZ', 'O2', 'FC3', 'FC4', 'C5', 'C1', 'C2', 'C6', 'CP3', 'CPZ', 'CP4', 'P1', 'P2', 'POZ', 'TP7', 'TP8', 'AF7', 'AF3', 'AF4', 'AF8', 'PO3', 'PO4'])       # common channels to 2017 and 2019 datasets 
+        
+        # Mapping 1 (2019 -> 2017 datasets)
+        # FP1 = FP1
+        # FP2 = FP2
+        # NZ (missing) = FPZ
+        # AF7 = AF7
+        # AF3 = AF3
+        # AFZ = AFZ
+        # AF4 = AF4
+        # AF8 = AF8
+        # F9, F7, F3 = F7, F5, F3
+        # FZ = FZ
+        # F4, F8, F10 = F4, F6, F8
+        # FT9, FC5, FC3, FC1 = FT7, FC5, FC3, FC1
+        # Missing = FCZ
+        # FC2, FC4, FC6, FT10 = FC2, FC4, FC6, FT8 
+        # T7, C5, C3, C1 = T7, C5, C3, C1
+        # CZ = CZ
+        # C2, C4, C6, T8 = C2, C4, C6, T8
+        # TP9 = None
+        # TP7, CP5, CP3, CP1 = TP7, CP5, CP3, CP1
+        # CPZ = CPZ
+        # CP2, CP4, CP6, TP8 = CP2, CP4, CP6, TP8
+        # TP10 = None
+        # P7 = P7
+        # Missing = P5
+        # P3, P1 = P3, P1
+        # PZ = PZ
+        # P2, P4 = P2, P4
+        # Missing = P6
+        # P8 = P8
+        # PO3, POZ, PO4 = PO3, POZ, PO4
+        # O1, OZ, O2, = O1, OZ, O2
+        # PO9 = P9
+        # PO10 = P10
+        # Missing = IZ
+
+        # Mapping 2 (2019 -> 2017 datasets) correct and current
+        # FP1 = FP1
+        # FP2 = FP2
+        # NZ (missing) = FPZ
+        # AF7 = AF7
+        # AF3 = AF3
+        # AFZ = AFZ
+        # AF4 = AF4
+        # AF8 = AF8
+        # F9 = Missing
+        # F7, NONE, F3, NONE, FZ, NONE, F4, NONE, F8 = F7, F5, F3, F1, FZ, F2, F4, F6, F8
+        # F10 = Missing
+        # FT9, FT10 = Missing, Missing
+        # NONE, FC5, FC3, FC1, NONE, FC2, FC4, FC6, NONE = FT7, FC5, FC3, FC1, FCZ, FC2, FC4, FC6, FT8
+        # T7, C5, C3, C1 = T7, C5, C3, C1
+        # CZ = CZ
+        # C2, C4, C6, T8 = C2, C4, C6, T8
+        # TP9, TP10 = NONE, NONE
+        # TP7, CP5, CP3, CP1, CPZ, CP2, CP4, CP6, TP8 = TP7, CP5, CP3, CP1, CPZ, CP2, CP4, CP6, TP8
+        # NONE, P7, NONE, P3, P1, PZ, P2, P4, NNE, P8, NONE = P9, P7, P5, P3, P1, PZ, P2, PZ, P6, P8, P10
+        # NONE, PO3, POZ, PO4, NONE = PO7, PO3, POZ, PO4, PO8
+        # O1, OZ, O2 = O1, OZ, O2
+        # PO9, PO10 = NONE, NONE
+
+        train_data, test_data = BCI2019.reorder_channels([train_data, test_data],
+                                                ['FP1', 'FP2', 'F7', 'F3', 'FZ', 'F4', 'F8', 'FC5', 'FC1', 'FC2', 'FC6', 'T7', 'C3', 'CZ', 'C4', 'T8', 'CP5', 'CP1', 'CP2', 'CP6', 'P7', 'P3', 'PZ', 'P4', 'P8', 'O1', 'OZ', 'O2', 'FC3', 'FC4', 'C5', 'C1', 'C2', 'C6', 'CP3', 'CPZ', 'CP4', 'P1', 'P2', 'POZ', 'TP7', 'TP8', 'AF7', 'AF3', 'AF4', 'AF8', 'PO3', 'PO4'],
+                                                #['FP1', 'AF7', 'AF3', 'F3', 'F7', 'F9', 'FT7', 'FC5', 'FC3', 'FC1', 'C1', 'C3', 'C5', 'T7', 'TP7', 'CP5', 'CP3', 'CP1', 'P1', 'P3', 'P5', 'P7', 'P9', 'PO7', 'PO3', 'O1', 'OZ', 'POZ', 'PZ', 'CPZ', 'FPZ', 'FP2', 'AF8', 'AF4', 'AFZ', 'FZ', 'F2', 'F4', 'F6', 'F8', 'FT8', 'FC6', 'FC4', 'FC2', 'FCZ', 'CZ', 'C2', 'C4', 'C6', 'T8', 'TP8', 'CP6', 'CP4', 'CP2', 'P2', 'P4', 'P6', 'P8', 'P10', 'PO8', 'PO4', 'O2']) # for TL purposes
+                                                ['FP1', 'AF7', 'AF3', 'F3', 'F7', 'FC5', 'FC3', 'FC1', 'C1', 'C3', 'C5', 'T7', 'TP7', 'CP5', 'CP3', 'CP1', 'P1', 'P3', 'P7', 'PO3', 'O1', 'OZ', 'POZ', 'PZ', 'CPZ', 'FP2', 'AF8', 'AF4', 'FZ', 'F4', 'F8', 'FC6', 'FC4', 'FC2', 'CZ', 'C2', 'C4', 'C6', 'T8', 'TP8', 'CP6', 'CP4', 'CP2', 'P2', 'P4', 'P8', 'PO4', 'O2']) # for TL purposes, same order as 2017 source dataset
+    
+        train_data, test_data = BCI2019.downsample([train_data, test_data], 512, 1000)
+        
+        subj_nr = BCI2019.get_subj_name(subj_file)
+        
+        train_samples = [{'subject': subj_nr, 'eeg':trial, 'label': train_labels[i], "split": "train"} for i, trial in enumerate(train_data)]
+        test_samples = [{'subject': subj_nr, 'eeg':trial, 'label': test_labels[i], "split": "test"} for i, trial in enumerate(test_data)]
+        
+        #ds.extend(train_samples)
+        #ds.extend(test_samples)
+    
+        return train_samples + test_samples
+
         #random.shuffle(train_ds)
         #random.shuffle(train_ds)
-        with open(dataset_path + "ds.pkl", "wb") as f:
-            pickle.dump(ds, f)
+        #with open(dataset_path + "ds.pkl", "ab") as f:
+        #    pickle.dump(ds, f, pickle.HIGHEST_PROTOCOL)
