@@ -65,7 +65,6 @@ class LModelWrapper(L.LightningModule):
         self.batch_logits = []
         self.batch_labels = []
 
-
     def training_step(self, batch, batch_idx):
         assert self.model.training
         self.step(batch)
@@ -173,26 +172,27 @@ class LModelWrapper(L.LightningModule):
             own_state[name].copy_(param)
     
     def freeze(self, fine_tune_mode):
-        excluded_layers = [] 
+        excluded_layers = []        # layers to train (unfreeze)
         match fine_tune_mode:
             case 1:
                 super().freeze()
                 print("Freezing full model!")
             case 2:
                 excluded_layers = ["final_layer"]
-                print("Freezing final layer!")
+                print("Fine-tuning final layer!")
             case 3:
                 excluded_layers = ["final_layer", "fc"]
-                print("Freezing all FC!")
+                print("Fine-tuning FC!")
             case _:
                 return # do nothing
             
         for name, params in self.model.named_parameters():
-            should_freeze = [layer_type in name for layer_type in excluded_layers]
-            if len(should_freeze) == 0:
+            should_fine_tune = True in [layer_type in name for layer_type in excluded_layers]
+            if not should_fine_tune:
                 params.requires_grad = False
+                print("Frozen: ", name)
             else:
-                print(name)
+                print("Unfrozen:", name)
 
     def save_model(self):
         if self.current_epoch % 5 == 0:
