@@ -1,8 +1,10 @@
 import os.path
-import random
+#import random
 import glob
 import scipy.io
 import pickle
+from scipy.signal import resample
+
 from .eegdataset import EEGDataset, EEGDataModule, np, torch
 
 
@@ -39,7 +41,9 @@ class BCI54sub_62ch_2class(EEGDataset):
         return len(self._data)
     
     def get_final_fc_length(self):
-        return 10440 # TODO: don't hardcode this, compute it based on the transformer output
+        # return 10440 # TODO: don't hardcode this, compute it based on the transformer output
+        return 5200 # TODO: don't hardcode this, compute it based on the transformer output
+        #return 6600 # TODO: don't hardcode this, compute it based on the transformer output
     
     def plot(self):
         raw = torch.tensor(self._data[0]['eeg_data']).unsqueeze(0)
@@ -47,11 +51,11 @@ class BCI54sub_62ch_2class(EEGDataset):
     
     @staticmethod
     def setup(dataset_path, batch_size):
-        if not os.path.isfile(dataset_path):
+        if not os.path.isfile(dataset_path + "ds.pkl"):
             BCI54sub_62ch_2class.create_ds(dataset_path)
 
         ds = None
-        with open(dataset_path, "rb") as f:
+        with open(dataset_path + "ds.pkl", "rb") as f:
             ds = pickle.load(f)
 
         train_ds = [sample for sample in ds if sample['split'] == "train"]
@@ -95,6 +99,15 @@ class BCI54sub_62ch_2class(EEGDataset):
                 temp_ds[:, new_ch_pos, :] = ds[:, old_ch_pos, :]
             reordered_ds.append(temp_ds)
         return reordered_ds
+    
+    @staticmethod
+    def downsample(datasets, new_freq: int, curr_freq: int):
+        downsampled = []
+        for ds in datasets:
+            signal_len = ds[0].shape[1]     # current signal length
+            new_nr_samples = int(signal_len * (new_freq / curr_freq))   # number of points to be left in the signal after downsampling the signal
+            downsampled.append([resample(signal, new_nr_samples, axis = 1) for signal in ds])
+        return downsampled
 
     @staticmethod
     def create_ds(dataset_path, print_ch_names = False):
@@ -190,6 +203,8 @@ class BCI54sub_62ch_2class(EEGDataset):
                                                   #['FP1', 'AF7', 'AF3', 'F3', 'F7', 'F9', 'FT7', 'FC5', 'FC3', 'FC1', 'C1', 'C3', 'C5', 'T7', 'TP7', 'CP5', 'CP3', 'CP1', 'P1', 'P3', 'P5', 'P7', 'P9', 'PO7', 'PO3', 'O1', 'OZ', 'POZ', 'PZ', 'CPZ', 'FPZ', 'FP2', 'AF8', 'AF4', 'AFZ', 'FZ', 'F2', 'F4', 'F6', 'F8', 'FT8', 'FC6', 'FC4', 'FC2', 'FCZ', 'CZ', 'C2', 'C4', 'C6', 'T8', 'TP8', 'CP6', 'CP4', 'CP2', 'P2', 'P4', 'P6', 'P8', 'P10', 'PO8', 'PO4', 'O2']) # for TL purposes
                                                   ['FP1', 'AF7', 'AF3', 'F3', 'F7', 'FC5', 'FC3', 'FC1', 'C1', 'C3', 'C5', 'T7', 'TP7', 'CP5', 'CP3', 'CP1', 'P1', 'P3', 'P7', 'PO3', 'O1', 'OZ', 'POZ', 'PZ', 'CPZ', 'FP2', 'AF8', 'AF4', 'FZ', 'F4', 'F8', 'FC6', 'FC4', 'FC2', 'CZ', 'C2', 'C4', 'C6', 'T8', 'TP8', 'CP6', 'CP4', 'CP2', 'P2', 'P4', 'P8', 'PO4', 'O2']) # for TL purposes, same order as 2017 source dataset
         
+            train_data, test_data = BCI54sub_62ch_2class.downsample([train_data, test_data], 512, 1000)
+            
             subj_nr = BCI54sub_62ch_2class.get_subj_name(subj_file)
             
             train_samples = [{'subject': subj_nr, 'eeg':trial, 'label': train_labels[i], "split": "train"} for i, trial in enumerate(train_data)]
