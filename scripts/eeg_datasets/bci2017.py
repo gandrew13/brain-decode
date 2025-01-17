@@ -34,8 +34,6 @@ class BCI2017(EEGDataset):
         print("EEG sample length:", len(self._data[0]['eeg'][0]))
         print("Number of classes:", self.get_num_classes())
 
-
-
     def __getitem__(self, index):
         eeg = self._data[index]['eeg']
         eeg = eeg[:, 2 * 512:]  # skip the 2 seconds before the cue

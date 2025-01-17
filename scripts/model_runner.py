@@ -8,8 +8,8 @@ from lightning.pytorch.loggers import CSVLogger
 from eeg_datasets.alljoined1 import Alljoined1
 from eeg_datasets.eegimagenet import EEGImageNetDataset
 from eeg_datasets.bci_iv_2a import BCIIV2a
-from scripts.eeg_datasets.bci2017 import BCI2017
-from scripts.eeg_datasets.bci2019 import BCI2019
+from eeg_datasets.bci2017 import BCI2017
+from eeg_datasets.bci2019 import BCI2019
 from model_wrapper import L, LModelWrapper
 
 class Runner:
@@ -20,9 +20,11 @@ class Runner:
 
         self.dataset_loader = self.setup_dataset()
         self.model = LModelWrapper(self.__args.model, self.__args.load_pretrained, self.__args.freeze_model == 'True', int(self.__args.fine_tune_mode), self.dataset_loader.get_num_classes(), self.dataset_loader.get_num_chans(), self.dataset_loader.get_final_fc_length())        
-
+        
         if self.__args.deterministic == 'True':
             self.seed()
+
+        self.model.save_hyperparameters(vars(self.__args))
 
     def run(self):
         experiment_name = "%s_%s" % (self.__args.dataset, self.__args.model)
