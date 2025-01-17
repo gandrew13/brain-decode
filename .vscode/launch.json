@@ -120,23 +120,19 @@
                      //"--dataset", "bci_iv_2a",
                      //"--dataset", "eegimagenet",
                      //"--dataset", "alljoined1",
-                     "--dataset", "54sub_62ch_2class",
-                     //"--dataset", "52sub_64ch_2class",
+                     "--dataset", "bci2019",
+                     //"--dataset", "bci2017",
                      //"--model", "eegnet",
                      "--model", "eegconformer",
                      //"--model", "mlp",
-                     "--dataset_path", "Datasets/54sub_62ch_2class/",
-                     //"--dataset_path", "Datasets/52sub_64ch_2class/ds.pkl",
+                     "--dataset_path", "Datasets/bci2019/",
+                     //"--dataset_path", "Datasets/bci2017/ds.pkl",
                      "--epochs", "31",
                      "--batch_size", "32",
                      "--deterministic", "True",
                      //"--dataset_path", "Datasets/BCICIV_2a_mat/",
                      //"--dataset_path", "Datasets/EEGImageNet/EEG-ImageNet_full.pth",
-                     //"--dataset_path", "Datasets/EEGImageNet/EEG-ImageNet_full.pth",
-                     //"--load_pretrained", "scripts/logs/52sub_64ch_2class_eegconformer/version_25/best_train_loss.pth",
-                     //"--load_pretrained", "scripts/logs/52sub_64ch_2class_eegconformer/version_28/best_train_loss.pth",
-                     //"--load_pretrained", "scripts/logs/52sub_64ch_2class_eegconformer/version_45/best_train_loss.pth",
-                     "--load_pretrained", "scripts/logs/52sub_64ch_2class_eegconformer/version_46/best_train_loss.pth",     // trained on all BCI2017 subjects
+                     "--load_pretrained", "scripts/logs/bci2017_eegconformer/version_46/best_train_loss.pth",     // trained on all BCI2017 subjects
                      "--freeze_model", "False",
                      "--fine_tune_mode", "0",       // 1 - full freeze, 2 - classification layer, 3 - all FC layers
                      "--cross_validation", "False",     // run NR_SUBJECTS experiments by leaving one subject out each time
@@ -146,9 +142,8 @@
                      "--random_pretrain_subjects", "False",
                      "--valid_subject", "1",    // TODO: this should support a list of subjects
                      "--test_subject", "43",    // TODO: this should support a list of subjects
-                     //"--plot_file", "scripts/logs/52sub_64ch_2class_eegconformer/version_23/metrics.csv"
+                     //"--plot_file", "scripts/logs/bci2017_eegconformer/version_23/metrics.csv"
             ]
-
         },
     ]
 }

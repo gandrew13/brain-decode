@@ -1,11 +1,11 @@
 *.pyc
 
 Datasets/EEGImageNet/*.pth
-Datasets/52sub_64ch_2class/*.mat
+Datasets/bci2017/*.mat
 Datasets/BCICIV_2a_mat/*.mat
 Datasets/BCICIV_2a_mat/*.gdf
-Datasets/52sub_64ch_2class/*
-Datasets/54sub_62ch_2class/*
+Datasets/bci2017/*
+Datasets/bci2019/*
 Datasets/Alljoined1/*.fif
 
 .torcheeg/

@@ -10,9 +10,10 @@ from .eegdataset import EEGDataset, EEGDataModule, np, torch
 
 subject = False
 
-class BCI54sub_62ch_2class(EEGDataset):
+class BCI2019(EEGDataset):
     '''
     Paper: https://academic.oup.com/gigascience/article/8/5/giz002/5304369#494016103  (2019)
+    54 subjects, 62 channels, 2 classes (MI, imagining grasping with left or right hand)
     '''
     def __init__(self, data):
         # one-hot encoding
@@ -52,7 +53,7 @@ class BCI54sub_62ch_2class(EEGDataset):
     @staticmethod
     def setup(dataset_path, batch_size):
         if not os.path.isfile(dataset_path + "ds.pkl"):
-            BCI54sub_62ch_2class.create_ds(dataset_path)
+            BCI2019.create_ds(dataset_path)
 
         ds = None
         with open(dataset_path + "ds.pkl", "rb") as f:
@@ -61,9 +62,9 @@ class BCI54sub_62ch_2class(EEGDataset):
         train_ds = [sample for sample in ds if sample['split'] == "train"]
         test_ds = [sample for sample in ds if sample['split'] == "test"]
 
-        train_ds = BCI54sub_62ch_2class(train_ds)
-        valid_ds = BCI54sub_62ch_2class(test_ds)
-        test_ds = BCI54sub_62ch_2class(test_ds)
+        train_ds = BCI2019(train_ds)
+        valid_ds = BCI2019(test_ds)
+        test_ds = BCI2019(test_ds)
 
         return EEGDataModule(train_ds, valid_ds, test_ds, int(batch_size))
     
@@ -125,7 +126,7 @@ class BCI54sub_62ch_2class(EEGDataset):
             assert np.array_equal(train_data[8], test_data[8])    # check train and test data have the exact same channels
             
             if print_ch_names:
-                BCI54sub_62ch_2class.print_channel_names(train_data[8][0])  # 8 = index of the channel names
+                BCI2019.print_channel_names(train_data[8][0])  # 8 = index of the channel names
 
             train_labels = train_data[5][0]
             test_labels = test_data[5][0]
@@ -133,7 +134,7 @@ class BCI54sub_62ch_2class(EEGDataset):
             train_data = np.transpose(train_data[0], (1, 2, 0))   # (seq_len, trials, channels) -> (trials, channels, seq_len)
             test_data = np.transpose(test_data[0], (1, 2, 0))
 
-            train_data, test_data = BCI54sub_62ch_2class.filter_channels([train_data, test_data],
+            train_data, test_data = BCI2019.filter_channels([train_data, test_data],
                                         ['FP1', 'FP2', 'F7', 'F3', 'FZ', 'F4', 'F8', 'FC5', 'FC1', 'FC2', 'FC6', 'T7', 'C3', 'CZ', 'C4', 'T8', 'TP9', 'CP5', 'CP1', 'CP2', 'CP6', 'TP10', 'P7', 'P3', 'PZ', 'P4', 'P8', 'PO9', 'O1', 'OZ', 'O2', 'PO10', 'FC3', 'FC4', 'C5', 'C1', 'C2', 'C6', 'CP3', 'CPZ', 'CP4', 'P1', 'P2', 'POZ', 'FT9', 'FTT9h', 'TTP7h', 'TP7', 'TPP9h', 'FT10', 'FTT10h', 'TPP8h', 'TP8', 'TPP10h', 'F9', 'F10', 'AF7', 'AF3', 'AF4', 'AF8', 'PO3', 'PO4'],
                                         #['FP1', 'FP2', 'F7', 'F3', 'FZ', 'F4', 'F8', 'FC5', 'FC1', 'FC2', 'FC6', 'T7', 'C3', 'CZ', 'C4', 'T8', 'CP5', 'CP1', 'CP2', 'CP6', 'P7', 'P3', 'PZ', 'P4', 'P8', 'PO9', 'O1', 'OZ', 'O2', 'PO10', 'FC3', 'FC4', 'C5', 'C1', 'C2', 'C6', 'CP3', 'CPZ', 'CP4', 'P1', 'P2', 'POZ', 'FT9', 'TP7', 'FT10', 'TP8', 'F9', 'F10', 'AF7', 'AF3', 'AF4', 'AF8', 'PO3', 'PO4'])
                                         ['FP1', 'FP2', 'F7', 'F3', 'FZ', 'F4', 'F8', 'FC5', 'FC1', 'FC2', 'FC6', 'T7', 'C3', 'CZ', 'C4', 'T8', 'CP5', 'CP1', 'CP2', 'CP6', 'P7', 'P3', 'PZ', 'P4', 'P8', 'O1', 'OZ', 'O2', 'FC3', 'FC4', 'C5', 'C1', 'C2', 'C6', 'CP3', 'CPZ', 'CP4', 'P1', 'P2', 'POZ', 'TP7', 'TP8', 'AF7', 'AF3', 'AF4', 'AF8', 'PO3', 'PO4'])       # common channels to 2017 and 2019 datasets 
@@ -198,14 +199,14 @@ class BCI54sub_62ch_2class(EEGDataset):
             # O1, OZ, O2 = O1, OZ, O2
             # PO9, PO10 = NONE, NONE
 
-            train_data, test_data = BCI54sub_62ch_2class.reorder_channels([train_data, test_data],
+            train_data, test_data = BCI2019.reorder_channels([train_data, test_data],
                                                   ['FP1', 'FP2', 'F7', 'F3', 'FZ', 'F4', 'F8', 'FC5', 'FC1', 'FC2', 'FC6', 'T7', 'C3', 'CZ', 'C4', 'T8', 'CP5', 'CP1', 'CP2', 'CP6', 'P7', 'P3', 'PZ', 'P4', 'P8', 'O1', 'OZ', 'O2', 'FC3', 'FC4', 'C5', 'C1', 'C2', 'C6', 'CP3', 'CPZ', 'CP4', 'P1', 'P2', 'POZ', 'TP7', 'TP8', 'AF7', 'AF3', 'AF4', 'AF8', 'PO3', 'PO4'],
                                                   #['FP1', 'AF7', 'AF3', 'F3', 'F7', 'F9', 'FT7', 'FC5', 'FC3', 'FC1', 'C1', 'C3', 'C5', 'T7', 'TP7', 'CP5', 'CP3', 'CP1', 'P1', 'P3', 'P5', 'P7', 'P9', 'PO7', 'PO3', 'O1', 'OZ', 'POZ', 'PZ', 'CPZ', 'FPZ', 'FP2', 'AF8', 'AF4', 'AFZ', 'FZ', 'F2', 'F4', 'F6', 'F8', 'FT8', 'FC6', 'FC4', 'FC2', 'FCZ', 'CZ', 'C2', 'C4', 'C6', 'T8', 'TP8', 'CP6', 'CP4', 'CP2', 'P2', 'P4', 'P6', 'P8', 'P10', 'PO8', 'PO4', 'O2']) # for TL purposes
                                                   ['FP1', 'AF7', 'AF3', 'F3', 'F7', 'FC5', 'FC3', 'FC1', 'C1', 'C3', 'C5', 'T7', 'TP7', 'CP5', 'CP3', 'CP1', 'P1', 'P3', 'P7', 'PO3', 'O1', 'OZ', 'POZ', 'PZ', 'CPZ', 'FP2', 'AF8', 'AF4', 'FZ', 'F4', 'F8', 'FC6', 'FC4', 'FC2', 'CZ', 'C2', 'C4', 'C6', 'T8', 'TP8', 'CP6', 'CP4', 'CP2', 'P2', 'P4', 'P8', 'PO4', 'O2']) # for TL purposes, same order as 2017 source dataset
         
-            train_data, test_data = BCI54sub_62ch_2class.downsample([train_data, test_data], 512, 1000)
+            train_data, test_data = BCI2019.downsample([train_data, test_data], 512, 1000)
             
-            subj_nr = BCI54sub_62ch_2class.get_subj_name(subj_file)
+            subj_nr = BCI2019.get_subj_name(subj_file)
             
             train_samples = [{'subject': subj_nr, 'eeg':trial, 'label': train_labels[i], "split": "train"} for i, trial in enumerate(train_data)]
             test_samples = [{'subject': subj_nr, 'eeg':trial, 'label': test_labels[i], "split": "test"} for i, trial in enumerate(test_data)]

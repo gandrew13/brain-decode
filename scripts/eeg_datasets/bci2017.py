@@ -8,9 +8,10 @@ from .eegdataset import EEGDataset, EEGDataModule, np, torch
 
 subject = False
 
-class BCI52sub_64ch_2class(EEGDataset):
+class BCI2017(EEGDataset):
     '''
     Paper: https://academic.oup.com/gigascience/article/6/7/gix034/3796323  (2017)
+    52 subjects, 64 channels, 2 classes (MI, imagining moving left or right hand)
     '''
     def __init__(self, data):
         # one-hot encoding
@@ -55,7 +56,7 @@ class BCI52sub_64ch_2class(EEGDataset):
     @staticmethod
     def setup(dataset_path, train_subjects, random_pretrain_subjects, valid_subj, test_subj, batch_size):
         if not os.path.isfile(dataset_path):
-            BCI52sub_64ch_2class.create_ds(dataset_path)
+            BCI2017.create_ds(dataset_path)
 
         ds = None
         with open(dataset_path, "rb") as f:
@@ -89,9 +90,9 @@ class BCI52sub_64ch_2class(EEGDataset):
         valid_ds = [sample for sample in ds if sample['subject'] == valid_subj]
         test_ds = [sample for sample in ds if sample['subject'] == test_subj]
 
-        train_ds = BCI52sub_64ch_2class(train_ds)
-        valid_ds = BCI52sub_64ch_2class(valid_ds)
-        test_ds = BCI52sub_64ch_2class(test_ds)
+        train_ds = BCI2017(train_ds)
+        valid_ds = BCI2017(valid_ds)
+        test_ds = BCI2017(test_ds)
 
         return EEGDataModule(train_ds, valid_ds, test_ds, int(batch_size))
 
@@ -134,20 +135,32 @@ class BCI52sub_64ch_2class(EEGDataset):
 
             #left_hand_trials = BCI52sub_64ch_2class.elim_bad_trials(left_hand_trials, eeg_data[14], 0)       # left hand
             #right_hand_trials = BCI52sub_64ch_2class.elim_bad_trials(right_hand_trials, eeg_data[14], 1)     # right hand
+
             subject = int(eeg_data[13].item().split(' ')[1])
             left_hand_samples = [{'subject': subject, 'eeg':sample[:64], 'label': 0} for sample in left_hand_trials]
             right_hand_samples = [{'subject': subject, 'eeg':sample[:64], 'label': 1} for sample in right_hand_trials]
             ds.extend(left_hand_samples)
             ds.extend(right_hand_samples)
             # TODO: Process the data !!! Maybe also check all datasets again, and keep only the best ones to test on
-
+        
         random.shuffle(ds)
         with open(dataset_path, "wb") as f:
             pickle.dump(ds, f)
 
     @staticmethod
-    def elim_bad_trials(data, bad_trials, hand):
+    def elim_bad_trials(data, bad_trials, hand): 
         temp = bad_trials['bad_trial_idx_voltage']
+        print(type(temp), temp.shape, temp.dtype)
+        temp = temp.item()
+        print(type(temp), temp.shape, temp.dtype)
+        temp = temp[0,0]
+        print(type(temp), temp.shape, temp.dtype)
+        #if temp.shape != (0, 0):
+            
+        #    temp = temp.item()
+        #    print(type(temp), temp)
+
+        return []
         temp1 = temp.item().ravel()[hand]
         
         temp = bad_trials['bad_trial_idx_mi']

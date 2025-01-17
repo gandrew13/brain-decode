@@ -8,8 +8,8 @@ from lightning.pytorch.loggers import CSVLogger
 from eeg_datasets.alljoined1 import Alljoined1
 from eeg_datasets.eegimagenet import EEGImageNetDataset
 from eeg_datasets.bci_iv_2a import BCIIV2a
-from eeg_datasets.bci52sub_64ch_2class import BCI52sub_64ch_2class
-from eeg_datasets.bci54sub_62ch_2class import BCI54sub_62ch_2class
+from scripts.eeg_datasets.bci2017 import BCI2017
+from scripts.eeg_datasets.bci2019 import BCI2019
 from model_wrapper import L, LModelWrapper
 
 class Runner:
@@ -39,10 +39,10 @@ class Runner:
                 return Alljoined1.setup()
             case "bci_iv_2a":
                 return BCIIV2a.setup(self.__args.dataset_path)
-            case "52sub_64ch_2class":
-                return BCI52sub_64ch_2class.setup(self.__args.dataset_path, self.__args.train_subjects, self.__args.random_pretrain_subjects, self.__args.valid_subject, self.__args.test_subject, self.__args.batch_size)
-            case "54sub_62ch_2class":
-                return BCI54sub_62ch_2class.setup(self.__args.dataset_path, self.__args.batch_size)
+            case "bci2017":
+                return BCI2017.setup(self.__args.dataset_path, self.__args.train_subjects, self.__args.random_pretrain_subjects, self.__args.valid_subject, self.__args.test_subject, self.__args.batch_size)
+            case "bci2019":
+                return BCI2019.setup(self.__args.dataset_path, self.__args.batch_size)
             case _:
                 print("Error: Unknown dataset!")
 
