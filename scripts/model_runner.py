@@ -44,7 +44,7 @@ class Runner:
             case "bci2017":
                 return BCI2017.setup(self.__args.dataset_path, self.__args.train_subjects, self.__args.random_pretrain_subjects, self.__args.valid_subject, self.__args.test_subject, self.__args.batch_size)
             case "bci2019":
-                return BCI2019.setup(self.__args.dataset_path, self.__args.batch_size)
+                return BCI2019.setup(self.__args.dataset_path, self.__args.train_subjects, self.__args.batch_size)
             case _:
                 print("Error: Unknown dataset!")
 

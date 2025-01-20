@@ -52,12 +52,13 @@ class BCI2019(EEGDataset):
         super().plot(raw, 1000)
     
     @staticmethod
-    def setup(dataset_path, batch_size):
-        if not os.path.isfile(dataset_path + "ds.pkl"):
-            BCI2019.create_ds(dataset_path)
+    def setup(dataset_path, train_subject, batch_size):
+        ds_file = dataset_path + "ds" + train_subject + ".pkl"
+        if not os.path.isfile(ds_file):
+            BCI2019.create_ds(dataset_path, train_subject)
 
         ds = None
-        with open(dataset_path + "ds.pkl", "rb") as f:
+        with open(ds_file, "rb") as f:
             ds = pickle.load(f)
 
         train_ds = [sample for sample in ds if sample['split'] == "train"]
@@ -112,16 +113,19 @@ class BCI2019(EEGDataset):
         return downsampled
 
     @staticmethod
-    def create_ds(dataset_path, print_ch_names = False):
+    def create_ds(dataset_path, train_subject, print_ch_names = False):
         '''
         Creates a single dataset file out of all the subject files.
         Currently just reads one .mat file (one session of an object)
         '''
         ds = []
-        files = list(glob.glob(dataset_path + "*.mat"))
+        if train_subject:
+            files = [dataset_path + "raw/sess01_subj" + train_subject + "_EEG_MI.mat"]
+        else:
+            files = list(glob.glob(dataset_path + "raw/" + "*.mat"))
         [ds.extend(BCI2019.process_file(file, dataset_path)) for file in files]
 
-        with open(dataset_path + "ds.pkl", "ab") as f:
+        with open(dataset_path + "ds" + train_subject + ".pkl", "wb") as f:
             pickle.dump(ds, f, pickle.HIGHEST_PROTOCOL)
         
         #with ThreadPoolExecutor(max_workers=8) as threads:

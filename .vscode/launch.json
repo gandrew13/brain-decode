@@ -137,7 +137,7 @@
                      "--fine_tune_mode", "0",       // 1 - full freeze, 2 - classification layer, 3 - all FC layers
                      "--cross_validation", "False",     // run NR_SUBJECTS experiments by leaving one subject out each time
                      //"--train_subjects", "1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,30,31,33,34,35,36,37,38,39,40,41,42",  // pretrain subjects
-                     "--train_subjects", "1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,30,31,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52",  // pretrain subjects
+                     "--train_subjects", "01",  // pretrain subjects
                      //"--train_subjects", "43,44,45,46,47,48,49,50,51,52",  // downstream subjects for fine-tuning
                      "--random_pretrain_subjects", "False",
                      "--valid_subject", "1",    // TODO: this should support a list of subjects
