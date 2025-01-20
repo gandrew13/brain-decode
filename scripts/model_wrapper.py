@@ -38,6 +38,7 @@ class LModelWrapper(L.LightningModule):
 
         self.__pretrained_model = pretrained_model
         if pretrained_model:
+            print("Loading pretrained model from: ", pretrained_model)
             self.__checkpoint = load(pretrained_model)
             if "model" in self.__checkpoint:
                 self.load_weights(self.__checkpoint["model"])
@@ -197,7 +198,7 @@ class LModelWrapper(L.LightningModule):
     def save_model(self):
         if self.current_epoch % 5 == 0:
             if self.prev_losses["prev_train_loss"] > self.epoch_loss:
-                print("Saving model...")
+                print("Saving model in ", self.logger.log_dir)
                 checkpoint = {
                     "prev_train_loss": self.epoch_loss, 
                     "model":  self.model.state_dict(),
