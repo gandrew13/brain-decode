@@ -62,10 +62,11 @@ class BCI2019(EEGDataset):
             ds = pickle.load(f)
 
         train_ds = [sample for sample in ds if sample['split'] == "train"]
+        valid_ds = [sample for sample in ds if sample['split'] == "valid"]
         test_ds = [sample for sample in ds if sample['split'] == "test"]
 
         train_ds = BCI2019(train_ds)
-        valid_ds = BCI2019(test_ds)
+        valid_ds = BCI2019(valid_ds)
         test_ds = BCI2019(test_ds)
 
         return EEGDataModule(train_ds, valid_ds, test_ds, int(batch_size))
@@ -223,13 +224,18 @@ class BCI2019(EEGDataset):
         
         subj_nr = BCI2019.get_subj_name(subj_file)
         
-        train_samples = [{'subject': subj_nr, 'eeg':trial, 'label': train_labels[i], "split": "train"} for i, trial in enumerate(train_data)]
-        test_samples = [{'subject': subj_nr, 'eeg':trial, 'label': test_labels[i], "split": "test"} for i, trial in enumerate(test_data)]
+        valid_perc = int((10 / 100) * len(train_data))
+        train_samples = train_data[valid_perc:]
+        valid_samples = train_data[:valid_perc]
+
+        train_samples = [{'subject': subj_nr, 'eeg':trial, 'label': train_labels[i], "split": "train"} for i, trial in enumerate(train_samples)]
+        valid_samples = [{'subject': subj_nr, 'eeg':trial, 'label': train_labels[i], "split": "valid"} for i, trial in enumerate(valid_samples)]
+        test_samples  = [{'subject': subj_nr, 'eeg':trial, 'label': test_labels[i], "split": "test"} for i, trial in enumerate(test_data)]
         
         #ds.extend(train_samples)
         #ds.extend(test_samples)
     
-        return train_samples + test_samples
+        return train_samples + valid_samples + test_samples
 
         #random.shuffle(train_ds)
         #random.shuffle(train_ds)
