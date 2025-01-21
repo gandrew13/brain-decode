@@ -1,5 +1,5 @@
 
-
+from pathlib import Path
 from torch import optim, cuda, save, load
 from torch.nn import CrossEntropyLoss
 import lightning as L
@@ -61,7 +61,7 @@ class LModelWrapper(L.LightningModule):
 
         #self.batch_results = {"train_batch_logits": [], "train_batch_labels": [], "valid_batch_logits": [], "valid_batch_labels": []}
 
-        self.my_log_dict = {"epoch": -1, "train_loss": 1000.0, "eval_loss": 1000.0, "train_acc": -1.0, "eval_acc": -1.0, "test_acc": -1.0}
+        self.my_log_dict = {"epoch": -1, "train_loss": 1000.0, "eval_loss": 1000.0, "train_acc": -1.0, "valid_acc": -1.0, "test_acc": -1.0}
 
         self.batch_logits = []
         self.batch_labels = []
@@ -112,7 +112,7 @@ class LModelWrapper(L.LightningModule):
         print("\nMean loss:", mean_loss)
         self.my_log_dict["epoch"] = int(self.current_epoch)
         self.my_log_dict["train_loss"] = mean_loss
-        self.save_model()
+        #self.save_model()
 
         self.epoch_loss = 0.0
         
@@ -124,14 +124,20 @@ class LModelWrapper(L.LightningModule):
         self.batch_logits = []
         self.batch_labels = []
 
-
     def on_validation_epoch_end(self):
         assert not self.model.training
-        self.my_log_dict["valid_acc"] = self.compute_accuracy(self.valid_accuracy)
+        val_acc = self.compute_accuracy(self.valid_accuracy)
+        self.save_best_val_acc_model(val_acc)
+        self.my_log_dict["valid_acc"] = val_acc
         print("\nValidation Accuracy:", self.my_log_dict["valid_acc"], "\n")
         mean_loss = round(self.epoch_loss / self.trainer.num_val_batches[0], 3)
         self.my_log_dict["eval_loss"] = mean_loss
         self.epoch_loss = 0.0
+
+    def on_test_epoch_start(self):
+        checkpoint = torch.load(self.logger.log_dir + "/best_val_acc.pth")
+        self.model.load_state_dict(checkpoint["model"])
+        self.model.eval()
 
     def on_test_epoch_end(self):
         assert not self.model.training
@@ -204,5 +210,17 @@ class LModelWrapper(L.LightningModule):
                     "model":  self.model.state_dict(),
                     "optimizer": self.optimizers().state_dict()
                 }
+                Path(self.logger.log_dir).mkdir(parents=True, exist_ok=True)
                 save(checkpoint, self.logger.log_dir + "/best_train_loss.pth")
                 self.prev_losses["prev_train_loss"] = self.epoch_loss
+
+    def save_best_val_acc_model(self, val_acc):
+        if val_acc > self.my_log_dict["valid_acc"]:
+            print("Saving best val acc model in ", self.logger.log_dir)
+            checkpoint = {
+                "prev_train_loss": self.epoch_loss, 
+                "model":  self.model.state_dict(),
+                "optimizer": self.optimizers().state_dict()
+            }
+            Path(self.logger.log_dir).mkdir(parents=True, exist_ok=True)
+            save(checkpoint, self.logger.log_dir + "/best_val_acc.pth")

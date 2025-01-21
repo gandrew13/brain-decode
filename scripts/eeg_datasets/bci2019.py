@@ -224,12 +224,15 @@ class BCI2019(EEGDataset):
         
         subj_nr = BCI2019.get_subj_name(subj_file)
         
-        valid_perc = int((10 / 100) * len(train_data))
-        train_samples = train_data[valid_perc:]
-        valid_samples = train_data[:valid_perc]
+        valid_perc = int((20 / 100) * len(test_data))
+        valid_data = test_data[:valid_perc]
+        test_data = test_data[valid_perc:]
 
-        train_samples = [{'subject': subj_nr, 'eeg':trial, 'label': train_labels[i], "split": "train"} for i, trial in enumerate(train_samples)]
-        valid_samples = [{'subject': subj_nr, 'eeg':trial, 'label': train_labels[i], "split": "valid"} for i, trial in enumerate(valid_samples)]
+        valid_labels = test_labels[:valid_perc]
+        test_labels = test_labels[valid_perc:]
+
+        train_samples = [{'subject': subj_nr, 'eeg':trial, 'label': train_labels[i], "split": "train"} for i, trial in enumerate(train_data)]
+        valid_samples = [{'subject': subj_nr, 'eeg':trial, 'label': valid_labels[i], "split": "valid"} for i, trial in enumerate(valid_data)]
         test_samples  = [{'subject': subj_nr, 'eeg':trial, 'label': test_labels[i], "split": "test"} for i, trial in enumerate(test_data)]
         
         #ds.extend(train_samples)
