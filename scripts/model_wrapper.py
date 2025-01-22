@@ -66,6 +66,8 @@ class LModelWrapper(L.LightningModule):
         self.batch_logits = []
         self.batch_labels = []
 
+        self.best_val_acc = -1.0
+
     def training_step(self, batch, batch_idx):
         assert self.model.training
         self.step(batch)
@@ -215,7 +217,8 @@ class LModelWrapper(L.LightningModule):
                 self.prev_losses["prev_train_loss"] = self.epoch_loss
 
     def save_best_val_acc_model(self, val_acc):
-        if val_acc > self.my_log_dict["valid_acc"]:
+        if val_acc > self.best_val_acc:
+            self.best_val_acc = val_acc
             print("Saving best val acc model in ", self.logger.log_dir)
             checkpoint = {
                 "prev_train_loss": self.epoch_loss, 
