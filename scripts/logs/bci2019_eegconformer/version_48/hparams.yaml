@@ -1,0 +1,15 @@
+batch_size: '10'
+cross_validation: 'False'
+dataset: bci2019
+dataset_path: /media/agalbenus/EXTERN/
+deterministic: 'False'
+epochs: '31'
+fine_tune_mode: '0'
+freeze_model: 'False'
+load_pretrained: null
+model: eegconformer
+plot_file: null
+random_pretrain_subjects: 'False'
+test_subject: '43'
+train_subjects: '01'
+valid_subject: '1'
