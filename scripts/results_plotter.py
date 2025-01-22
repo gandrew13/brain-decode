@@ -29,6 +29,7 @@ def plot(train_results_file: str, eval_resuls_file: str) -> None:
     plt.plot(eval_steps, eval_losses, label = "eval loss")
 
     plt.legend()
+    plt.title('Figure 1 - Full model train/eval loss', y=-0.13)
     plt.show()
 
 def main():
