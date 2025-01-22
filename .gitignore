@@ -13,4 +13,4 @@ Datasets/Alljoined1/*.fif
 scripts/best_train_loss.pth
 scripts/best_train_loss.pth.bkp
 scripts/logs/*/*/best_train_loss.pth
-
+scripts/logs/*/*/best_val_acc.pth
