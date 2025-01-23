@@ -90,8 +90,8 @@ class LModelWrapper(L.LightningModule):
 
     def configure_optimizers(self):
         opt = optim.AdamW(self.parameters(), lr=1e-3)
-        #if self.__pretrained_model and "optimizer" in self.__checkpoint:
-            #opt.load_state_dict(self.__checkpoint["optimizer"])        # TODO: Re-enable this, load optimize state
+        if self.__pretrained_model and "optimizer" in self.__checkpoint:
+            opt.load_state_dict(self.__checkpoint["optimizer"])        # TODO: Re-enable this, load optimize state
         return opt
         #return optim.SGD(self.parameters(), lr=0.01, weight_decay=0.001, momentum=0.9)
         #return optim.SGD(self.parameters(), lr=1e-2, weight_decay=1e-3, momentum=0.9)
@@ -173,8 +173,8 @@ class LModelWrapper(L.LightningModule):
             print(name, param.shape)
             if name not in own_state:
                 raise "Error: Discrepance between loaded pretrained weights and model weights."  
-            if "fc.fc" in name:
-                continue
+            #if "fc.fc" in name:
+            #    continue
             if isinstance(param, torch.nn.Parameter):
                 # backwards compatibility for serialized parameters
                 param = param.data

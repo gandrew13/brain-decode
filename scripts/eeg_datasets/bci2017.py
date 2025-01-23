@@ -36,7 +36,7 @@ class BCI2017(EEGDataset):
 
     def __getitem__(self, index):
         eeg = self._data[index]['eeg']
-        eeg = eeg[:, 2 * 512:]  # skip the 2 seconds before the cue
+        eeg = eeg[:, 2 * 512:]  # skip the 2 seconds before the cue, 5 seconds remain
 
         return self._preprocess_sample(eeg, normalize=True), self._labels[index]
     

@@ -44,8 +44,8 @@ class BCI2019(EEGDataset):
     
     def get_final_fc_length(self):
         # return 10440 # TODO: don't hardcode this, compute it based on the transformer output
-        return 5200 # TODO: don't hardcode this, compute it based on the transformer output
-        #return 6600 # TODO: don't hardcode this, compute it based on the transformer output
+        #return 5200 # TODO: don't hardcode this, compute it based on the transformer output
+        return 6600 # TODO: don't hardcode this, compute it based on the transformer output
     
     def plot(self):
         raw = torch.tensor(self._data[0]['eeg_data']).unsqueeze(0)
@@ -133,7 +133,7 @@ class BCI2019(EEGDataset):
         #    t_res = threads.map(BCI2019.process_file, files)
         
     @staticmethod
-    def process_file(subj_file, dataset_path = "", print_ch_names = False):
+    def process_file(subj_file, dataset_path = "", use_continuous_data = True, print_ch_names = False):
         print("Processing file: ", subj_file)
         subj_data = scipy.io.loadmat(subj_file)
         train_data = subj_data['EEG_MI_train'].item()
@@ -147,10 +147,20 @@ class BCI2019(EEGDataset):
         train_labels = train_data[5][0]
         test_labels = test_data[5][0]
 
-        train_data = np.transpose(train_data[0], (1, 2, 0))   # (seq_len, trials, channels) -> (trials, channels, seq_len)
-        test_data = np.transpose(test_data[0], (1, 2, 0))
+        ds = [train_data, test_data]
+        if use_continuous_data:
+            for i, split in enumerate(ds):
+                stimulus_onset_idx = split[2][0]                              # stimulus onset timepoint (index) for each trial
+                split = np.split(split[1], stimulus_onset_idx, axis=0)[1:]    # drop first item since it's the data before the first stimulus onset, so we don't need it
+                split = [trial[:5000,:] for trial in split]
+                split = np.transpose(split, (0, 2, 1))                        # (trials, seq_len, channels) -> (trials, channels, seq_len)
+                ds[i] = split           
+        else:
+            for i, split in enumerate(ds):
+                split = np.transpose(split[0], (1, 2, 0))   # (seq_len, trials, channels) -> (trials, channels, seq_len)
+                ds[i] = split
 
-        train_data, test_data = BCI2019.filter_channels([train_data, test_data],
+        train_data, test_data = BCI2019.filter_channels(ds,
                                     ['FP1', 'FP2', 'F7', 'F3', 'FZ', 'F4', 'F8', 'FC5', 'FC1', 'FC2', 'FC6', 'T7', 'C3', 'CZ', 'C4', 'T8', 'TP9', 'CP5', 'CP1', 'CP2', 'CP6', 'TP10', 'P7', 'P3', 'PZ', 'P4', 'P8', 'PO9', 'O1', 'OZ', 'O2', 'PO10', 'FC3', 'FC4', 'C5', 'C1', 'C2', 'C6', 'CP3', 'CPZ', 'CP4', 'P1', 'P2', 'POZ', 'FT9', 'FTT9h', 'TTP7h', 'TP7', 'TPP9h', 'FT10', 'FTT10h', 'TPP8h', 'TP8', 'TPP10h', 'F9', 'F10', 'AF7', 'AF3', 'AF4', 'AF8', 'PO3', 'PO4'],
                                     #['FP1', 'FP2', 'F7', 'F3', 'FZ', 'F4', 'F8', 'FC5', 'FC1', 'FC2', 'FC6', 'T7', 'C3', 'CZ', 'C4', 'T8', 'CP5', 'CP1', 'CP2', 'CP6', 'P7', 'P3', 'PZ', 'P4', 'P8', 'PO9', 'O1', 'OZ', 'O2', 'PO10', 'FC3', 'FC4', 'C5', 'C1', 'C2', 'C6', 'CP3', 'CPZ', 'CP4', 'P1', 'P2', 'POZ', 'FT9', 'TP7', 'FT10', 'TP8', 'F9', 'F10', 'AF7', 'AF3', 'AF4', 'AF8', 'PO3', 'PO4'])
                                     ['FP1', 'FP2', 'F7', 'F3', 'FZ', 'F4', 'F8', 'FC5', 'FC1', 'FC2', 'FC6', 'T7', 'C3', 'CZ', 'C4', 'T8', 'CP5', 'CP1', 'CP2', 'CP6', 'P7', 'P3', 'PZ', 'P4', 'P8', 'O1', 'OZ', 'O2', 'FC3', 'FC4', 'C5', 'C1', 'C2', 'C6', 'CP3', 'CPZ', 'CP4', 'P1', 'P2', 'POZ', 'TP7', 'TP8', 'AF7', 'AF3', 'AF4', 'AF8', 'PO3', 'PO4'])       # common channels to 2017 and 2019 datasets 
