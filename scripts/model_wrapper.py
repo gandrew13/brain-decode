@@ -90,8 +90,11 @@ class LModelWrapper(L.LightningModule):
 
     def configure_optimizers(self):
         opt = optim.AdamW(self.parameters(), lr=1e-3)
-        if self.__pretrained_model and "optimizer" in self.__checkpoint:
-            opt.load_state_dict(self.__checkpoint["optimizer"])        # TODO: Re-enable this, load optimize state
+        try:
+            if self.__pretrained_model and "optimizer" in self.__checkpoint:
+                opt.load_state_dict(self.__checkpoint["optimizer"])        # TODO: Re-enable this, load optimize state
+        except:
+            print("Warning: Couldn't load pretrained optimizer.")
         return opt
         #return optim.SGD(self.parameters(), lr=0.01, weight_decay=0.001, momentum=0.9)
         #return optim.SGD(self.parameters(), lr=1e-2, weight_decay=1e-3, momentum=0.9)
@@ -137,8 +140,12 @@ class LModelWrapper(L.LightningModule):
         self.epoch_loss = 0.0
 
     def on_test_epoch_start(self):
-        checkpoint = torch.load(self.logger.log_dir + "/best_val_acc.pth")
-        self.model.load_state_dict(checkpoint["model"])
+        best_val_acc_chkp = self.logger.log_dir + "/best_val_acc.pth"
+        if Path(best_val_acc_chkp).exists():
+            checkpoint = torch.load(best_val_acc_chkp)
+            self.model.load_state_dict(checkpoint["model"])
+        else:
+            print("Warning: Couldn't load the pretrained network.")
         self.model.eval()
 
     def on_test_epoch_end(self):
@@ -172,13 +179,14 @@ class LModelWrapper(L.LightningModule):
         for name, param in state_dict.items():
             print(name, param.shape)
             if name not in own_state:
-                raise "Error: Discrepance between loaded pretrained weights and model weights."  
-            #if "fc.fc" in name:
-            #    continue
-            if isinstance(param, torch.nn.Parameter):
-                # backwards compatibility for serialized parameters
-                param = param.data
-            own_state[name].copy_(param)
+                raise "Error: Discrepance between loaded pretrained weights and model weights."
+            try:
+                if isinstance(param, torch.nn.Parameter):
+                    # backwards compatibility for serialized parameters
+                    param = param.data
+                own_state[name].copy_(param)
+            except:
+                print("Warning: Couldn't load layer weights:", name, "(", param.shape, own_state[name].shape, ").")
     
     def freeze(self, fine_tune_mode):
         excluded_layers = []        # layers to train (unfreeze)
