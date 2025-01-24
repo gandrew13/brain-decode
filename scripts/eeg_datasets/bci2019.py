@@ -44,8 +44,8 @@ class BCI2019(EEGDataset):
     
     def get_final_fc_length(self):
         # return 10440 # TODO: don't hardcode this, compute it based on the transformer output
-        #return 5200 # TODO: don't hardcode this, compute it based on the transformer output
-        return 6600 # TODO: don't hardcode this, compute it based on the transformer output
+        return 5200 # TODO: don't hardcode this, compute it based on the transformer output
+        #return 6600 # TODO: don't hardcode this, compute it based on the transformer output
     
     def plot(self):
         raw = torch.tensor(self._data[0]['eeg_data']).unsqueeze(0)
@@ -133,7 +133,7 @@ class BCI2019(EEGDataset):
         #    t_res = threads.map(BCI2019.process_file, files)
         
     @staticmethod
-    def process_file(subj_file, dataset_path = "", use_continuous_data = True, print_ch_names = False):
+    def process_file(subj_file, dataset_path = "", use_continuous_data = False, print_ch_names = False):
         print("Processing file: ", subj_file)
         subj_data = scipy.io.loadmat(subj_file)
         train_data = subj_data['EEG_MI_train'].item()
