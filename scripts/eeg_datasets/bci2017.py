@@ -95,7 +95,7 @@ class BCI2017(EEGDataset):
         return EEGDataModule(train_ds, valid_ds, test_ds, int(batch_size))
 
     @staticmethod
-    def create_ds(dataset_path):
+    def create_ds(dataset_path, align_subjects = True):
         '''
         Creates a single dataset file out of all the subject files.
         '''
@@ -137,13 +137,18 @@ class BCI2017(EEGDataset):
             subject = int(eeg_data[13].item().split(' ')[1])
             left_hand_samples = [{'subject': subject, 'eeg':sample[:64], 'label': 0} for sample in left_hand_trials]
             right_hand_samples = [{'subject': subject, 'eeg':sample[:64], 'label': 1} for sample in right_hand_trials]
-            ds.extend(left_hand_samples)
-            ds.extend(right_hand_samples)
+
+            data = left_hand_samples + right_hand_samples
+
+            if align_subjects:
+                data = EEGDataset.align_data(data)
+            
+            ds.extend(data)
             # TODO: Process the data !!! Maybe also check all datasets again, and keep only the best ones to test on
         
         random.shuffle(ds)
         with open(dataset_path, "wb") as f:
-            pickle.dump(ds, f)
+            pickle.dump(ds, f, pickle.HIGHEST_PROTOCOL)
 
     @staticmethod
     def elim_bad_trials(data, bad_trials, hand): 

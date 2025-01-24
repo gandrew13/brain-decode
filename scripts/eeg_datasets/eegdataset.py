@@ -1,5 +1,6 @@
 from typing import Dict
 import numpy as np
+from scipy import linalg
 import mne
 import torch
 import lightning as L
@@ -86,6 +87,17 @@ class EEGDataset(Dataset):
 
         return eeg
 
+    @staticmethod
+    def align_data(data):
+        '''
+        Euclidian Alignment
+        https://www.semanticscholar.org/paper/Transfer-Learning-for-Brain%E2%80%93Computer-Interfaces%3A-A-He-Wu/2509582652372582c2d2cf37cfef7ef3f77e6cb7
+        '''
+        ref_mat = sum([np.cov(trial['eeg']) for trial in data]) / len(data)
+        ref_mat = linalg.sqrtm(linalg.inv(ref_mat))
+        for trial in data:
+            trial['eeg'] = ref_mat @ trial['eeg']
+        return data
 
     def _filter_channels(self, eeg: list) -> list:
         return [eeg[idx] for idx, ch in enumerate(self.__chan_order) if ch in self.__chans_to_keep]

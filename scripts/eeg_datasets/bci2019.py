@@ -133,7 +133,7 @@ class BCI2019(EEGDataset):
         #    t_res = threads.map(BCI2019.process_file, files)
         
     @staticmethod
-    def process_file(subj_file, dataset_path = "", use_continuous_data = False, print_ch_names = False):
+    def process_file(subj_file, dataset_path = "", use_continuous_data = False, align_subjects = True, print_ch_names = False):
         print("Processing file: ", subj_file)
         subj_data = scipy.io.loadmat(subj_file)
         train_data = subj_data['EEG_MI_train'].item()
@@ -245,10 +245,15 @@ class BCI2019(EEGDataset):
         valid_samples = [{'subject': subj_nr, 'eeg':trial, 'label': valid_labels[i], "split": "valid"} for i, trial in enumerate(valid_data)]
         test_samples  = [{'subject': subj_nr, 'eeg':trial, 'label': test_labels[i], "split": "test"} for i, trial in enumerate(test_data)]
         
+        data = train_samples + valid_samples + test_samples
+
+        if align_subjects:
+            data = EEGDataset.align_data(data)
+
         #ds.extend(train_samples)
         #ds.extend(test_samples)
     
-        return train_samples + valid_samples + test_samples
+        return data
 
         #random.shuffle(train_ds)
         #random.shuffle(train_ds)
