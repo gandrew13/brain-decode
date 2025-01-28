@@ -93,9 +93,25 @@ class BCI2017(EEGDataset):
         test_ds = BCI2017(test_ds)
 
         return EEGDataModule(train_ds, valid_ds, test_ds, int(batch_size))
+    
+    @staticmethod
+    def filter_channels(data, orig_chans, chans_to_keep: list):
+        for entry in data:
+            entry['eeg'] = np.stack([entry['eeg'][i,:] for i, ch_name in enumerate(orig_chans) if ch_name in chans_to_keep], axis=0)
+        return data
 
     @staticmethod
-    def create_ds(dataset_path, align_subjects = True):
+    def filter(data, sample_rate = 512, min_freq = 8, max_freq = 30):
+        nyq = 0.5 * sample_rate
+        min_freq = min_freq / nyq
+        max_freq = max_freq / nyq
+        sos = scipy.signal.butter(5, [min_freq, max_freq], 'bandpass', analog=False, fs=sample_rate, output='sos')
+        for entry in data:
+            entry['eeg'] = scipy.signal.sosfiltfilt(sos, entry['eeg'], axis = 1)
+        return data
+
+    @staticmethod
+    def create_ds(dataset_path, filter_data = True, align_subjects = True):
         '''
         Creates a single dataset file out of all the subject files.
         '''
@@ -107,6 +123,7 @@ class BCI2017(EEGDataset):
         for subj_file in glob.glob(dataset_path + "*.mat"):
             subj_data = scipy.io.loadmat(subj_file)
             eeg_data = subj_data["eeg"].item()
+
             if eeg_data[13].item() == 'subject 34' or eeg_data[13].item() == 'subject 29':  # skip these subjects, too many bad trials
                 continue
             print(eeg_data[13].item())
@@ -135,11 +152,15 @@ class BCI2017(EEGDataset):
             #right_hand_trials = BCI52sub_64ch_2class.elim_bad_trials(right_hand_trials, eeg_data[14], 1)     # right hand
 
             subject = int(eeg_data[13].item().split(' ')[1])
+
             left_hand_samples = [{'subject': subject, 'eeg':sample[:64], 'label': 0} for sample in left_hand_trials]
             right_hand_samples = [{'subject': subject, 'eeg':sample[:64], 'label': 1} for sample in right_hand_trials]
 
             data = left_hand_samples + right_hand_samples
 
+            if filter_data:
+                data = BCI2017.filter(data, 512, 8, 30)
+            
             if align_subjects:
                 data = EEGDataset.align_data(data)
             

@@ -114,7 +114,17 @@ class BCI2019(EEGDataset):
         return downsampled
 
     @staticmethod
-    def create_ds(dataset_path, train_subject, print_ch_names = False):
+    def filter(datasets, sample_rate = 512, min_freq = 8, max_freq = 30):
+        nyq = 0.5 * sample_rate
+        min_freq = min_freq / nyq
+        max_freq = max_freq / nyq
+        for i, ds in enumerate(datasets):
+            sos = scipy.signal.butter(5, [min_freq, max_freq], 'bandpass', analog=False, fs=sample_rate, output='sos')
+            datasets[i] = scipy.signal.sosfiltfilt(sos, ds, axis = 2)
+        return datasets
+
+    @staticmethod
+    def create_ds(dataset_path, train_subject, print_ch_names = True):
         '''
         Creates a single dataset file out of all the subject files.
         Currently just reads one .mat file (one session of an object)
@@ -133,7 +143,7 @@ class BCI2019(EEGDataset):
         #    t_res = threads.map(BCI2019.process_file, files)
         
     @staticmethod
-    def process_file(subj_file, dataset_path = "", use_continuous_data = False, align_subjects = True, print_ch_names = False):
+    def process_file(subj_file, dataset_path = "", use_continuous_data = False, align_subjects = True, filter_data = True, print_ch_names = True):
         print("Processing file: ", subj_file)
         subj_data = scipy.io.loadmat(subj_file)
         train_data = subj_data['EEG_MI_train'].item()
@@ -240,6 +250,9 @@ class BCI2019(EEGDataset):
 
         valid_labels = test_labels[:valid_perc]
         test_labels = test_labels[valid_perc:]
+
+        if filter_data:
+            train_data, valid_data, test_data = BCI2019.filter([train_data, valid_data, test_data], 512, 8, 30)
 
         train_samples = [{'subject': subj_nr, 'eeg':trial, 'label': train_labels[i], "split": "train"} for i, trial in enumerate(train_data)]
         valid_samples = [{'subject': subj_nr, 'eeg':trial, 'label': valid_labels[i], "split": "valid"} for i, trial in enumerate(valid_data)]
