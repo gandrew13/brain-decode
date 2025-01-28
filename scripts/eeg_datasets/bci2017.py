@@ -1,4 +1,5 @@
 import os.path
+from copy import deepcopy
 import random
 import glob
 import scipy.io
@@ -56,39 +57,26 @@ class BCI2017(EEGDataset):
     @staticmethod
     def setup(dataset_path, train_subjects, random_pretrain_subjects, valid_subj, test_subj, batch_size):
         if not os.path.isfile(dataset_path):
-            BCI2017.create_ds(dataset_path)
+            BCI2017.create_ds(dataset_path, train_subjects=train_subjects, valid_subj=valid_subj, test_subj=test_subj, random_pretrain_subjects=random_pretrain_subjects)
 
         ds = None
         with open(dataset_path, "rb") as f:
             ds = pickle.load(f)
 
-        # TODO: Review this code, check it works on all cases, remove hardcoded values.
-        total_subjs = list(range(1, 53)) # subjects list 1-52
-        total_subjs.remove(32), total_subjs.remove(29)  # remove bad subjects
-        if random_pretrain_subjects == 'True':       # randomly select N subjects to train on
-            train_subjs = [random.choice(total_subjs) for _ in range(1, 26)]     # split the dataset in half, this should be a param
-            left_out_subjs = [subj for subj in total_subjs if subj not in train_subjs]
-        elif train_subjects:
-            train_subjs = [int(subj) for subj in train_subjects.split(',')]
-            left_out_subjs = [subj for subj in total_subjs if subj not in train_subjs]
-        else:
-            train_subjs = total_subjs
-            left_out_subjs = []
+        train_ds = []
+        valid_ds = []
+        test_ds = []
 
-        print("Train subjs: ", train_subjs)
-        print("Left-out subjects (for fine-tuning): ", left_out_subjs)
-        print("Valid subject: ", valid_subj)
-        print("Test subject: ", test_subj)
-
-        #train_ds = [sample for sample in ds if sample['subject'] != 'subject 50' and sample['subject'] != test_subj]
-        test_subj = int(test_subj)
-        valid_subj = int(valid_subj)
-        #train_ds = [sample for sample in ds if sample['subject'] in train_subjs and sample['subject'] != test_subj]
-        train_ds = [sample for sample in ds if sample['subject'] in train_subjs] # don't exclude the test subject from training, we're training on the entire dataset for TL
-
-        # Continue from here, implement valid and test ds subjects, push, and sync with the code on JEUWELS
-        valid_ds = [sample for sample in ds if sample['subject'] == valid_subj]
-        test_ds = [sample for sample in ds if sample['subject'] == test_subj]
+        for sample in ds:
+            match sample['split']:
+                case 'train':
+                    train_ds.append(sample)
+                case 'valid':
+                    valid_ds.append(sample)
+                case 'test':
+                    test_ds.append(sample)
+                case _:
+                    print("Error: No dataset split specified for sample.")
 
         train_ds = BCI2017(train_ds)
         valid_ds = BCI2017(valid_ds)
@@ -111,9 +99,49 @@ class BCI2017(EEGDataset):
         for entry in data:
             entry['eeg'] = scipy.signal.sosfiltfilt(sos, entry['eeg'], axis = 1)
         return data
+    
+    @staticmethod
+    def create_dataset_splits(ds, train_subjects, valid_subj, test_subj, random_pretrain_subjects):
+        # TODO: Review this code, check it works on all cases, remove hardcoded values.
+        total_subjs = list(range(1, 53)) # subjects list 1-52
+        total_subjs.remove(32), total_subjs.remove(29)  # remove bad subjects
+        if random_pretrain_subjects == 'True':       # randomly select N subjects to train on
+            train_subjs = [random.choice(total_subjs) for _ in range(1, 26)]     # split the dataset in half, this should be a param
+            left_out_subjs = [subj for subj in total_subjs if subj not in train_subjs]
+        elif train_subjects:
+            train_subjs = [int(subj) for subj in train_subjects.split(',')]
+            left_out_subjs = [subj for subj in total_subjs if subj not in train_subjs]
+        else:
+            train_subjs = total_subjs
+            left_out_subjs = []
+
+        print("Train subjs: ", train_subjs)
+        print("Left-out subjects (for fine-tuning): ", left_out_subjs)
+        print("Valid subject: ", valid_subj)
+        print("Test subject: ", test_subj)
+
+        #train_ds = [sample for sample in ds if sample['subject'] != 'subject 50' and sample['subject'] != test_subj]
+        test_subj = int(test_subj)
+        valid_subj = int(valid_subj)
+        #train_ds = [sample for sample in ds if sample['subject'] in train_subjs and sample['subject'] != test_subj]
+        train_ds = []
+        valid_ds = []
+        test_ds = []
+        for sample in ds:
+            sample_subj = sample['subject']
+            if sample_subj in train_subjs: #and sample['subject'] != test_subj # don't exclude the test subject from training, we're training on the entire dataset for TL
+                train_ds.append(deepcopy(sample))
+                train_ds[-1]['split'] = 'train'
+            if sample_subj == valid_subj:
+                valid_ds.append(deepcopy(sample))
+                valid_ds[-1]['split'] = 'valid'
+            if sample_subj == test_subj:
+                test_ds.append(deepcopy(sample))
+                test_ds[-1]['split'] = 'test'
+        return train_ds + valid_ds + test_ds
 
     @staticmethod
-    def create_ds(dataset_path, filter_data = True, align_subjects = True):
+    def create_ds(dataset_path, train_subjects, valid_subj, test_subj, random_pretrain_subjects, filter_data = True, align_subjects = True):
         '''
         Creates a single dataset file out of all the subject files.
         '''
@@ -173,7 +201,8 @@ class BCI2017(EEGDataset):
             ds.extend(data)
             # TODO: Process the data !!! Maybe also check all datasets again, and keep only the best ones to test on
         
-        random.shuffle(ds)
+        #random.shuffle(ds)
+        ds = BCI2017.create_dataset_splits(ds, train_subjects, valid_subj, test_subj, random_pretrain_subjects)
         with open(dataset_path, "wb") as f:
             pickle.dump(ds, f, pickle.HIGHEST_PROTOCOL)
 
