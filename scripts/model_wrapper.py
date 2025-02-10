@@ -117,7 +117,7 @@ class LModelWrapper(L.LightningModule):
         print("\nMean loss:", mean_loss)
         self.my_log_dict["epoch"] = int(self.current_epoch)
         self.my_log_dict["train_loss"] = mean_loss
-        #self.save_model()
+        self.save_model()
 
         self.epoch_loss = 0.0
         
