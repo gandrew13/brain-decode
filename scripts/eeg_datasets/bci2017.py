@@ -167,7 +167,7 @@ class BCI2017(EEGDataset):
         return train_ds + valid_ds + test_ds
 
     @staticmethod
-    def create_ds(dataset_path, train_subjects, valid_subj, test_subj, random_pretrain_subjects, filter_data = True, align_subjects = True):
+    def create_ds(dataset_path, train_subjects, valid_subj, test_subj, random_pretrain_subjects, filter_data = False, align_subjects = True):
         '''
         Creates a single dataset file out of all the subject files.
         '''
