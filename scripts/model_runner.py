@@ -29,7 +29,7 @@ class Runner:
 
     def run(self):
         experiment_name = "%s_%s" % (self.__args.dataset, self.__args.model)
-        trainer = L.Trainer(max_epochs=int(self.__args.epochs), logger=CSVLogger("scripts/logs",  experiment_name), num_sanity_val_steps=0, enable_checkpointing=False, deterministic=(self.__args.deterministic == 'True'))
+        trainer = L.Trainer(max_epochs=int(self.__args.epochs), logger=CSVLogger(self.__args.dataset_path + "logs/",  experiment_name), num_sanity_val_steps=0, enable_checkpointing=False, deterministic=(self.__args.deterministic == 'True'))
         trainer.fit(model=self.model, train_dataloaders=self.dataset_loader)
         trainer.test(model=self.model, dataloaders=self.dataset_loader)
         self.plot(self.__args.plot_file)
