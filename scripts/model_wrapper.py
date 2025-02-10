@@ -90,11 +90,11 @@ class LModelWrapper(L.LightningModule):
 
     def configure_optimizers(self):
         opt = optim.AdamW(self.parameters(), lr=1e-3)
-        try:
-            if self.__pretrained_model and "optimizer" in self.__checkpoint:
-                opt.load_state_dict(self.__checkpoint["optimizer"])        # TODO: Re-enable this, load optimize state
-        except:
-            print("Warning: Couldn't load pretrained optimizer.")
+        #try:
+        #    if self.__pretrained_model and "optimizer" in self.__checkpoint:
+        #        opt.load_state_dict(self.__checkpoint["optimizer"])        # TODO: Re-enable this, load optimizer state
+        #except:
+        #    print("Warning: Couldn't load pretrained optimizer.")
         return opt
         #return optim.SGD(self.parameters(), lr=0.01, weight_decay=0.001, momentum=0.9)
         #return optim.SGD(self.parameters(), lr=1e-2, weight_decay=1e-3, momentum=0.9)
@@ -141,6 +141,7 @@ class LModelWrapper(L.LightningModule):
 
     def on_test_epoch_start(self):
         best_val_acc_chkp = self.logger.log_dir + "/best_val_acc.pth"
+        #best_val_acc_chkp = "scripts/logs/bci2019_eegconformer/version_127/best_val_acc.pth"
         if Path(best_val_acc_chkp).exists():
             checkpoint = torch.load(best_val_acc_chkp)
             self.model.load_state_dict(checkpoint["model"])
