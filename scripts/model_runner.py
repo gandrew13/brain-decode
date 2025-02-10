@@ -51,6 +51,9 @@ class Runner:
             case _:
                 print("Error: Unknown dataset!")
 
+    def get_test_accuracy(self):
+        return self.model.my_log_dict["test_acc"] * 100 # return as percentage
+
     def plot(self, file):
         if not file:
             return
