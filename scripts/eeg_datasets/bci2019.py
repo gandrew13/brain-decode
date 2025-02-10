@@ -57,14 +57,30 @@ class BCI2019(EEGDataset):
         super().plot(raw, 1000)
     
     @staticmethod
-    def setup(dataset_path, train_subject, batch_size):
+    def setup(dataset_path, train_subject, test_subject, batch_size):
         ds_file = dataset_path + "ds" + train_subject + ".pkl"
         if not os.path.isfile(ds_file):
-            BCI2019.create_ds(dataset_path, train_subject)
+            BCI2019.create_ds(dataset_path, train_subject, test_subject)
 
         ds = None
         with open(ds_file, "rb") as f:
             ds = pickle.load(f)
+
+        print("Subject: ", train_subject)
+
+        # for leave one subject out and then change this for fine-tuning and testing on LOSO
+        #train_ds = [sample for sample in ds if sample['split'] == "train" and sample['subject'] != int(test_subject)]
+        #valid_ds = [sample for sample in ds if sample['split'] == "valid" and sample['subject'] != int(test_subject)]
+        #test_ds  = [sample for sample in ds if sample['split'] == "test" and sample['subject'] != int(test_subject)]
+
+        #train_ds = [sample for sample in ds if sample['split'] == "train" and sample['subject'] == int(test_subject)]
+        #valid_ds = [sample for sample in ds if sample['split'] == "valid" and sample['subject'] == int(test_subject)]
+        #test_ds  = [sample for sample in ds if sample['split'] == "test" and sample['subject'] == int(test_subject)]
+
+        #if test_subject == "":
+        #    test_ds = [sample for sample in ds if sample['split'] == "test"]
+        #else:
+        #    test_ds = [sample for sample in ds if sample['split'] == "test" and sample['subject'] == int(test_subject)]
 
         train_ds = [sample for sample in ds if sample['split'] == "train"]
         valid_ds = [sample for sample in ds if sample['split'] == "valid"]
@@ -130,7 +146,7 @@ class BCI2019(EEGDataset):
         return datasets
 
     @staticmethod
-    def create_ds(dataset_path, train_subject, print_ch_names = True):
+    def create_ds(dataset_path, train_subject, test_subject, print_ch_names = True):
         '''
         Creates a single dataset file out of all the subject files.
         Currently just reads one .mat file (one session of an object)
@@ -140,7 +156,7 @@ class BCI2019(EEGDataset):
             files = [dataset_path + "raw/sess01_subj" + train_subject + "_EEG_MI.mat"]
         else:
             files = list(glob.glob(dataset_path + "raw/" + "*.mat"))
-        [ds.extend(BCI2019.process_file(file, dataset_path)) for file in files]
+        [ds.extend(BCI2019.process_file(file, dataset_path, test_subject)) for file in files]
 
         with open(dataset_path + "ds" + train_subject + ".pkl", "wb") as f:
             pickle.dump(ds, f, pickle.HIGHEST_PROTOCOL)
@@ -149,7 +165,7 @@ class BCI2019(EEGDataset):
         #    t_res = threads.map(BCI2019.process_file, files)
         
     @staticmethod
-    def process_file(subj_file, dataset_path = "", use_continuous_data = False, align_subjects = True, filter_data = True, print_ch_names = True):
+    def process_file(subj_file, dataset_path = "", test_subject = "", use_continuous_data = False, align_subjects = True, filter_data = True, print_ch_names = False):
         print("Processing file: ", subj_file)
         subj_data = scipy.io.loadmat(subj_file)
         train_data = subj_data['EEG_MI_train'].item()
@@ -252,20 +268,32 @@ class BCI2019(EEGDataset):
         train_data, test_data = BCI2019.downsample([train_data, test_data], 512, 1000)
         
         subj_nr = BCI2019.get_subj_name(subj_file)
+
+        #train_data_max_duration = 120 #sec, so 2 mins
+        train_data_max_duration = 300 #sec, so 5 mins
+        train_trials_max_num = int(train_data_max_duration / 4) #4s is the length of a segment, so we'll have 15 trials
+        valid_data = train_data[train_trials_max_num:]
+        valid_labels = train_labels[train_trials_max_num:]
+        train_data = train_data[:train_trials_max_num]
+        train_labels = train_labels[:train_trials_max_num]
         
-        valid_perc = int((20 / 100) * len(test_data))
-        valid_data = test_data[:valid_perc]
-        test_data = test_data[valid_perc:]
+        #valid_perc = int((20 / 100) * len(test_data))
+        #valid_data = test_data[:valid_perc]
+        #test_data = test_data[valid_perc:]
 
-        valid_labels = test_labels[:valid_perc]
-        test_labels = test_labels[valid_perc:]
-
+        #valid_labels = test_labels[:valid_perc]
+        #test_labels = test_labels[valid_perc:]
+        
         if filter_data:
             train_data, valid_data, test_data = BCI2019.filter([train_data, valid_data, test_data], 512, 8, 30)
 
         train_samples = [{'subject': subj_nr, 'eeg':trial, 'label': train_labels[i], "split": "train"} for i, trial in enumerate(train_data)]
         valid_samples = [{'subject': subj_nr, 'eeg':trial, 'label': valid_labels[i], "split": "valid"} for i, trial in enumerate(valid_data)]
         test_samples  = [{'subject': subj_nr, 'eeg':trial, 'label': test_labels[i], "split": "test"} for i, trial in enumerate(test_data)]
+        #if test_subject == "" or int(test_subject) == subj_nr:
+        #    test_samples  = [{'subject': subj_nr, 'eeg':trial, 'label': test_labels[i], "split": "test"} for i, trial in enumerate(test_data)]
+        #else:
+        #    test_samples = []
         
         data = train_samples + valid_samples + test_samples
 
