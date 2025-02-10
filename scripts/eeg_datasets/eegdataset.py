@@ -88,6 +88,31 @@ class EEGDataset(Dataset):
         return eeg
 
     @staticmethod
+    def setup(dataset_path):
+        # TODO: WIP, finish the function, this should be a common setup() function for all datasets
+        train_ds = []
+        valid_ds = []
+        test_ds = []
+
+        for file in dataset_path:
+            with open(file, "rb") as f:
+                import pickle
+                ds = pickle.load(file, "rb")
+                for sample in ds:
+                    if sample['split'] == 'train':
+                        train_ds.append(sample)
+                    elif sample['split'] == 'valid':
+                        valid_ds.append(sample)
+                    elif sample['split'] == 'test':
+                        test_ds.append(sample)
+
+        train_ds = EEGDataset(train_ds)
+        valid_ds = EEGDataset(valid_ds)
+        test_ds = EEGDataset(test_ds)
+
+        return EEGDataModule(train_ds, valid_ds, test_ds, 10)
+    
+    @staticmethod
     def align_data(data):
         '''
         Euclidian Alignment
