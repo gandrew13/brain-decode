@@ -78,6 +78,9 @@ class BCI2017(EEGDataset):
                 case _:
                     print("Error: No dataset split specified for sample.")
 
+        #train_ds = train_ds[:1000]
+        #valid_ds = valid_ds[:1000]
+
         train_ds = BCI2017(train_ds)
         valid_ds = BCI2017(valid_ds)
         test_ds = BCI2017(test_ds)
@@ -95,7 +98,7 @@ class BCI2017(EEGDataset):
         nyq = 0.5 * sample_rate
         min_freq = min_freq / nyq
         max_freq = max_freq / nyq
-        sos = scipy.signal.butter(5, [min_freq, max_freq], 'bandpass', analog=False, fs=sample_rate, output='sos')
+        sos = scipy.signal.butter(3, [min_freq, max_freq], 'bandpass', analog=False, fs=sample_rate, output='sos')
         for entry in data:
             entry['eeg'] = scipy.signal.sosfiltfilt(sos, entry['eeg'], axis = 1)
         return data
@@ -127,17 +130,40 @@ class BCI2017(EEGDataset):
         train_ds = []
         valid_ds = []
         test_ds = []
-        for sample in ds:
-            sample_subj = sample['subject']
-            if sample_subj in train_subjs: #and sample['subject'] != test_subj # don't exclude the test subject from training, we're training on the entire dataset for TL
-                train_ds.append(deepcopy(sample))
-                train_ds[-1]['split'] = 'train'
-            if sample_subj == valid_subj:
-                valid_ds.append(deepcopy(sample))
-                valid_ds[-1]['split'] = 'valid'
-            if sample_subj == test_subj:
-                test_ds.append(deepcopy(sample))
-                test_ds[-1]['split'] = 'test'
+
+        train_on_all_subjects = True    # enabled if we want to train on the entire dataset (all data of all subjects), in order to create a train/valid split
+        if train_on_all_subjects:
+            subj_dict = {}  # dataset divided by subject
+
+            for sample in ds:
+                subject = sample['subject']
+                if subject not in subj_dict:
+                    subj_dict[subject] = []
+                subj_dict[subject].append(sample)
+
+            train_perc = 97 #TODO: don't hardocde
+            train_ds, valid_ds = [], []
+            for _, v in subj_dict.items():
+                nr_samples = int((train_perc / 100) * len(v))
+                train_ds.extend(v[:nr_samples])
+                valid_ds.extend(v[nr_samples:])
+            for sample in train_ds:
+                sample['split'] = 'train'
+            for sample in valid_ds:
+                sample['split'] = 'valid'
+        else:      # split in train/valid/test by subject 
+            for sample in ds:
+                sample_subj = sample['subject']
+                if sample_subj in train_subjs: #and sample['subject'] != test_subj # don't exclude the test subject from training, we're training on the entire dataset for TL
+                    train_ds.append(deepcopy(sample))
+                    train_ds[-1]['split'] = 'train'
+                if sample_subj == valid_subj:
+                    valid_ds.append(deepcopy(sample))
+                    valid_ds[-1]['split'] = 'valid'
+                if sample_subj == test_subj:
+                    test_ds.append(deepcopy(sample))
+                    test_ds[-1]['split'] = 'test'
+
         return train_ds + valid_ds + test_ds
 
     @staticmethod
@@ -150,7 +176,7 @@ class BCI2017(EEGDataset):
 
         ds = []
         sample_len_ms = np.array([[-2000,  5000]], dtype=np.int16)
-        for subj_file in glob.glob(dataset_path + "*.mat"):
+        for subj_file in glob.glob(dataset_path + "raw/" + "*.mat"):
             subj_data = scipy.io.loadmat(subj_file)
             eeg_data = subj_data["eeg"].item()
 
