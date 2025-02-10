@@ -1,6 +1,6 @@
 import argparse
 import gc
-from model_runner import Runner
+from model_runner import Runner, np
 
 
 def data_prep(args: str):
@@ -39,6 +39,7 @@ def parse_args() -> str:
     parser.add_argument("-rts", "--random_pretrain_subjects", required=False, help="Whether subjects in the pretraining dataset split are randomly selected or not")
     parser.add_argument("-vs", "--valid_subject", required=True, help="Selected subject to validate on")
     parser.add_argument("-ts", "--test_subject", required=True, help="The left-out test subject")
+    parser.add_argument("-nr", "--num_runs", required=False, default=1, help="The number of times to repeat an experiment")
     parser.add_argument("-p", "--plot_file", required=False, help="Path to the results file to plot")
     #parser.add_argument("-g", "--granularity", required=False, help="choose from coarse, fine0-fine4 and all")
     #parser.add_argument("-m", "--model", required=False, help="model")
@@ -63,10 +64,15 @@ def main():
     for subj in test_subjects:
         print("\n\n===================================== NEW RUN ==========================================")
         args.test_subject = subj
-        runner = Runner(args)
-        runner.run()
-        del runner
-        gc.collect()
+        exp_res = []
+        for i in range(int(args.num_runs)):    
+            print("Experiment: ", i)
+            runner = Runner(args)
+            runner.run()
+            exp_res.append(runner.get_test_accuracy())
+            del runner
+            gc.collect()
+        print(subj, exp_res, "Mean: ", np.mean(exp_res), "Std dev: ", np.std(exp_res))
 
     #data_prep(args)
     #train()
