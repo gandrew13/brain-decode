@@ -125,7 +125,7 @@ class BCI2019(EEGDataset):
         min_freq = min_freq / nyq
         max_freq = max_freq / nyq
         for i, ds in enumerate(datasets):
-            sos = scipy.signal.butter(5, [min_freq, max_freq], 'bandpass', analog=False, fs=sample_rate, output='sos')
+            sos = scipy.signal.butter(3, [min_freq, max_freq], 'bandpass', analog=False, fs=sample_rate, output='sos')
             datasets[i] = scipy.signal.sosfiltfilt(sos, ds, axis = 2)
         return datasets
 
