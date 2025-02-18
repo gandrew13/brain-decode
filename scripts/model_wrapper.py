@@ -143,6 +143,7 @@ class LModelWrapper(L.LightningModule):
         best_val_acc_chkp = self.logger.log_dir + "/best_val_acc.pth"
         #best_val_acc_chkp = "scripts/logs/bci2019_eegconformer/version_127/best_val_acc.pth"
         if Path(best_val_acc_chkp).exists():
+            print("Loading best val acc model from: ", self.logger.log_dir)
             checkpoint = torch.load(best_val_acc_chkp)
             self.model.load_state_dict(checkpoint["model"])
         else:
@@ -201,6 +202,9 @@ class LModelWrapper(L.LightningModule):
             case 3:
                 excluded_layers = ["final_layer", "fc"]
                 print("Fine-tuning FC!")
+            case 4:
+                excluded_layers = ["transformer", "final_layer", "fc"] #keep (fine-tune or freeze) only CNN part, train the rest (from scratch or fine-tune)
+                print("Fine-tuning transformer + FC!")
             case _:
                 return # do nothing
             
