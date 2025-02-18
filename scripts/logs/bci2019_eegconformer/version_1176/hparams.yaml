@@ -1,0 +1,16 @@
+batch_size: '10'
+cross_validation: 'False'
+dataset: bci2019
+dataset_path: /media/agalbenus/EXTERN/bci2019/
+deterministic: 'False'
+epochs: '31'
+fine_tune_mode: '3'
+freeze_model: 'True'
+load_pretrained: scripts/logs/bci2017_eegconformer/version_54/best_train_loss.pth
+model: eegconformer
+num_runs: '100'
+plot_file: null
+random_pretrain_subjects: 'False'
+test_subject: '11'
+train_subjects: '11'
+valid_subject: '1'
