@@ -59,33 +59,35 @@ class BCI2017(EEGDataset):
         if not os.path.isfile(dataset_path):
             BCI2017.create_ds(dataset_path, train_subjects=train_subjects, valid_subj=valid_subj, test_subj=test_subj, random_pretrain_subjects=random_pretrain_subjects)
 
-        ds = None
-        with open(dataset_path, "rb") as f:
-            ds = pickle.load(f)
+        return EEGDataset.setup(dataset_path, batch_size)
 
-        train_ds = []
-        valid_ds = []
-        test_ds = []
-
-        for sample in ds:
-            match sample['split']:
-                case 'train':
-                    train_ds.append(sample)
-                case 'valid':
-                    valid_ds.append(sample)
-                case 'test':
-                    test_ds.append(sample)
-                case _:
-                    print("Error: No dataset split specified for sample.")
-
-        #train_ds = train_ds[:1000]
-        #valid_ds = valid_ds[:1000]
-
-        train_ds = BCI2017(train_ds)
-        valid_ds = BCI2017(valid_ds)
-        test_ds = BCI2017(test_ds)
-
-        return EEGDataModule(train_ds, valid_ds, test_ds, int(batch_size))
+        #ds = None
+        #with open(dataset_path, "rb") as f:
+        #    ds = pickle.load(f)
+#
+        #train_ds = []
+        #valid_ds = []
+        #test_ds = []
+#
+        #for sample in ds:
+        #    match sample['split']:
+        #        case 'train':
+        #            train_ds.append(sample)
+        #        case 'valid':
+        #            valid_ds.append(sample)
+        #        case 'test':
+        #            test_ds.append(sample)
+        #        case _:
+        #            print("Error: No dataset split specified for sample.")
+#
+        ##train_ds = train_ds[:1000]
+        ##valid_ds = valid_ds[:1000]
+#
+        #train_ds = BCI2017(train_ds)
+        #valid_ds = BCI2017(valid_ds)
+        #test_ds = BCI2017(test_ds)
+#
+        #return EEGDataModule(train_ds, valid_ds, test_ds, int(batch_size))
     
     @staticmethod
     def filter_channels(data, orig_chans, chans_to_keep: list):
@@ -131,7 +133,7 @@ class BCI2017(EEGDataset):
         valid_ds = []
         test_ds = []
 
-        train_on_all_subjects = True    # enabled if we want to train on the entire dataset (all data of all subjects), in order to create a train/valid split
+        train_on_all_subjects = False    # enabled if we want to train on the entire dataset (all data of all subjects), in order to create a train/valid split
         if train_on_all_subjects:
             subj_dict = {}  # dataset divided by subject
 

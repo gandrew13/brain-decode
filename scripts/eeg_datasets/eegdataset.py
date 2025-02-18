@@ -2,6 +2,7 @@ from typing import Dict
 import numpy as np
 from scipy import linalg
 import mne
+import pickle
 import torch
 import lightning as L
 from torch.utils.data import Dataset, DataLoader
@@ -49,11 +50,12 @@ class EEGDataModule(L.LightningDataModule):
 
 
 class EEGDataset(Dataset):
-    def __init__(self, data, labels, chans_order, chans_to_keep, ch_groups=[]):
+    def __init__(self, data, labels, final_fc_length, chans_order, chans_to_keep, ch_groups=[]):
         super().__init__()
 
         self._data = data
         self._labels = labels
+        self._final_fc_length = final_fc_length
 
         self.__chan_order = chans_order
         self.__chans_to_keep = chans_to_keep
@@ -69,11 +71,17 @@ class EEGDataset(Dataset):
         return len(list(set(self._labels)))
     
     def get_final_fc_length(self):
-        pass
+        return self._final_fc_length
+    
+    def __getitem__(self, index):
+        eeg = self._data[index]['eeg']
 
-    def _preprocess_sample(self, eeg, normalize=True, zero_pad=0):
+        return self._preprocess_sample(eeg, normalize=True), self._labels[index]
+
+    def _preprocess_sample(self, eeg, filter_channels=False, normalize=True, zero_pad=0):
         # filter channels (used to experiment with different number of channels)
-        eeg = self._filter_channels(eeg)
+        if filter_channels:
+            eeg = self._filter_channels(eeg)
 
         if self.__ch_groups != []:
             eeg = self._group_channels(eeg)
@@ -88,29 +96,32 @@ class EEGDataset(Dataset):
         return eeg
 
     @staticmethod
-    def setup(dataset_path):
+    def setup(dataset_path: list, final_fc_length, batch_size):
         # TODO: WIP, finish the function, this should be a common setup() function for all datasets
         train_ds = []
         valid_ds = []
         test_ds = []
 
         for file in dataset_path:
+            ds = None
             with open(file, "rb") as f:
-                import pickle
-                ds = pickle.load(file, "rb")
-                for sample in ds:
-                    if sample['split'] == 'train':
+                ds = pickle.load(f)
+            for sample in ds:
+                match sample['split']:
+                    case 'train':
                         train_ds.append(sample)
-                    elif sample['split'] == 'valid':
+                    case 'valid':
                         valid_ds.append(sample)
-                    elif sample['split'] == 'test':
+                    case 'test':
                         test_ds.append(sample)
+                    case _:
+                        print("Error: No dataset split specified for sample.")
 
-        train_ds = EEGDataset(train_ds)
-        valid_ds = EEGDataset(valid_ds)
-        test_ds = EEGDataset(test_ds)
+        train_ds = EEGDataset(train_ds, [entry['label'] for entry in train_ds], final_fc_length, [], ['FC3', 'FC1', 'C1', 'C3', 'C5', 'CP3', 'CP1', 'P1', 'POZ', 'PZ', 'CPZ', 'FZ', 'FC4', 'FC2', 'CZ', 'C2', 'C4', 'C6', 'CP4', 'CP2', 'P2'])
+        valid_ds = EEGDataset(valid_ds, [entry['label'] for entry in valid_ds], final_fc_length, [], ['FC3', 'FC1', 'C1', 'C3', 'C5', 'CP3', 'CP1', 'P1', 'POZ', 'PZ', 'CPZ', 'FZ', 'FC4', 'FC2', 'CZ', 'C2', 'C4', 'C6', 'CP4', 'CP2', 'P2'])
+        test_ds  = EEGDataset(test_ds,  [entry['label'] for entry in test_ds],  final_fc_length, [], ['FC3', 'FC1', 'C1', 'C3', 'C5', 'CP3', 'CP1', 'P1', 'POZ', 'PZ', 'CPZ', 'FZ', 'FC4', 'FC2', 'CZ', 'C2', 'C4', 'C6', 'CP4', 'CP2', 'P2'])
 
-        return EEGDataModule(train_ds, valid_ds, test_ds, 10)
+        return EEGDataModule(train_ds, valid_ds, test_ds, int(batch_size))
     
     @staticmethod
     def align_data(data):

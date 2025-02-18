@@ -62,35 +62,37 @@ class BCI2019(EEGDataset):
         if not os.path.isfile(ds_file):
             BCI2019.create_ds(dataset_path, train_subject, test_subject)
 
-        ds = None
-        with open(ds_file, "rb") as f:
-            ds = pickle.load(f)
+        return EEGDataset.setup([ds_file], BCI2019.get_final_fc_length(None), batch_size)
 
-        print("Subject: ", train_subject)
-
-        # for leave one subject out and then change this for fine-tuning and testing on LOSO
-        #train_ds = [sample for sample in ds if sample['split'] == "train" and sample['subject'] != int(test_subject)]
-        #valid_ds = [sample for sample in ds if sample['split'] == "valid" and sample['subject'] != int(test_subject)]
-        #test_ds  = [sample for sample in ds if sample['split'] == "test" and sample['subject'] != int(test_subject)]
-
-        #train_ds = [sample for sample in ds if sample['split'] == "train" and sample['subject'] == int(test_subject)]
-        #valid_ds = [sample for sample in ds if sample['split'] == "valid" and sample['subject'] == int(test_subject)]
-        #test_ds  = [sample for sample in ds if sample['split'] == "test" and sample['subject'] == int(test_subject)]
-
-        #if test_subject == "":
-        #    test_ds = [sample for sample in ds if sample['split'] == "test"]
-        #else:
-        #    test_ds = [sample for sample in ds if sample['split'] == "test" and sample['subject'] == int(test_subject)]
-
-        train_ds = [sample for sample in ds if sample['split'] == "train"]
-        valid_ds = [sample for sample in ds if sample['split'] == "valid"]
-        test_ds = [sample for sample in ds if sample['split'] == "test"]
-
-        train_ds = BCI2019(train_ds)
-        valid_ds = BCI2019(valid_ds)
-        test_ds = BCI2019(test_ds)
-
-        return EEGDataModule(train_ds, valid_ds, test_ds, int(batch_size))
+        #ds = None
+        #with open(ds_file, "rb") as f:
+        #    ds = pickle.load(f)
+#
+        #print("Subject: ", train_subject)
+#
+        ## for leave one subject out and then change this for fine-tuning and testing on LOSO
+        ##train_ds = [sample for sample in ds if sample['split'] == "train" and sample['subject'] != int(test_subject)]
+        ##valid_ds = [sample for sample in ds if sample['split'] == "valid" and sample['subject'] != int(test_subject)]
+        ##test_ds  = [sample for sample in ds if sample['split'] == "test" and sample['subject'] != int(test_subject)]
+#
+        ##train_ds = [sample for sample in ds if sample['split'] == "train" and sample['subject'] == int(test_subject)]
+        ##valid_ds = [sample for sample in ds if sample['split'] == "valid" and sample['subject'] == int(test_subject)]
+        ##test_ds  = [sample for sample in ds if sample['split'] == "test" and sample['subject'] == int(test_subject)]
+#
+        ##if test_subject == "":
+        ##    test_ds = [sample for sample in ds if sample['split'] == "test"]
+        ##else:
+        ##    test_ds = [sample for sample in ds if sample['split'] == "test" and sample['subject'] == int(test_subject)]
+#
+        #train_ds = [sample for sample in ds if sample['split'] == "train"]
+        #valid_ds = [sample for sample in ds if sample['split'] == "valid"]
+        #test_ds = [sample for sample in ds if sample['split'] == "test"]
+#
+        #train_ds = BCI2019(train_ds)
+        #valid_ds = BCI2019(valid_ds)
+        #test_ds = BCI2019(test_ds)
+#
+        #return EEGDataModule(train_ds, valid_ds, test_ds, int(batch_size))
     
     @staticmethod
     def print_channel_names(data):

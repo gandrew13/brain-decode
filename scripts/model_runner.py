@@ -47,7 +47,7 @@ class Runner:
             case "bci2019":
                 return BCI2019.setup(self.__args.dataset_path, self.__args.train_subjects, self.__args.test_subject, self.__args.batch_size)
             case "bci2017,bci2019":
-                return EEGDataset.setup(self.__args.dataset_path, self.__args.train_subjects, self.__args.batch_size)   # TODO, load 2 datasets for pretraining, WIP
+                return EEGDataset.setup(self.__args.dataset_path, self.__args.batch_size)   # TODO, load 2 datasets for pretraining, WIP
             case _:
                 print("Error: Unknown dataset!")
 
