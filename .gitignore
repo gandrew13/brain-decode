@@ -1,5 +1,7 @@
 *.pyc
 
+.venv/
+
 Datasets/EEGImageNet/*.pth
 Datasets/bci2017/*.mat
 Datasets/BCICIV_2a_mat/*.mat
@@ -14,3 +16,4 @@ scripts/best_train_loss.pth
 scripts/best_train_loss.pth.bkp
 scripts/logs/*/*/best_train_loss.pth
 scripts/logs/*/*/best_val_acc.pth
+
