@@ -1,0 +1,16 @@
+batch_size: '10'
+cross_validation: 'False'
+dataset: bci2017
+dataset_path: Datasets/bci2017/ds.pkl
+deterministic: 'False'
+epochs: '301'
+fine_tune_mode: '0'
+freeze_model: 'False'
+load_pretrained: null
+model: eegconformer
+num_runs: '1'
+plot_file: null
+random_pretrain_subjects: 'False'
+test_subject: '52'
+train_subjects: '01'
+valid_subject: '1'
