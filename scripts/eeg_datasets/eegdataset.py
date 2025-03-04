@@ -76,7 +76,8 @@ class EEGDataset(Dataset):
     def __getitem__(self, index):
         eeg = self._data[index]['eeg']
 
-        return self._preprocess_sample(eeg, normalize=True), self._labels[index]
+        #return self._preprocess_sample(eeg, normalize=True), self._labels[index]
+        return eeg, self._labels[index]
 
     def _preprocess_sample(self, eeg, filter_channels=False, normalize=True, zero_pad=0):
         # filter channels (used to experiment with different number of channels)
