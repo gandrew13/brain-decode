@@ -38,6 +38,9 @@ class BCI2017(EEGDataset):
         print("Number of classes:", self.get_num_classes())
 
     def __getitem__(self, index):
+        ### Unused, the parent method is called.
+        return None
+    
         eeg = self._data[index]['eeg']
         eeg = eeg[:, 2 * 512:]  # skip the 2 seconds before the cue, 5 seconds remain
 
@@ -59,7 +62,7 @@ class BCI2017(EEGDataset):
         if not os.path.isfile(dataset_path):
             BCI2017.create_ds(dataset_path, train_subjects=train_subjects, valid_subj=valid_subj, test_subj=test_subj, random_pretrain_subjects=random_pretrain_subjects)
 
-        return EEGDataset.setup(dataset_path, batch_size)
+        return EEGDataset.setup([dataset_path], BCI2017.get_final_fc_length(None), batch_size)
 
         #ds = None
         #with open(dataset_path, "rb") as f:

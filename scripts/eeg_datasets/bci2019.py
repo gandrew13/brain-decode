@@ -40,6 +40,9 @@ class BCI2019(EEGDataset):
         print("Number of classes:", self.get_num_classes())
 
     def __getitem__(self, index):
+        ### Unused, the parent method is called.
+        return None
+    
         eeg = self._data[index]['eeg']
 
         return self._preprocess_sample(eeg, normalize=True), self._labels[index]
