@@ -3,7 +3,10 @@ import os.path
 import glob
 import scipy.io
 import pickle
-from scipy.signal import resample
+#from scipy.signal import resample
+from matplotlib import pyplot as plt
+import mne
+
 #from concurrent.futures import ThreadPoolExecutor
 
 from .eegdataset import EEGDataset, EEGDataModule, np, torch
@@ -168,15 +171,156 @@ class BCI2019(EEGDataset):
         
         #with ThreadPoolExecutor(max_workers=8) as threads:
         #    t_res = threads.map(BCI2019.process_file, files)
-        
+    
     @staticmethod
     def process_file(subj_file, dataset_path = "", test_subject = "", use_continuous_data = False, align_subjects = True, filter_data = False, print_ch_names = False):
         print("Processing file: ", subj_file)
-        subj_data = scipy.io.loadmat(subj_file)
-        train_data = subj_data['EEG_MI_train'].item()
-        test_data = subj_data['EEG_MI_test'].item()
+        subj_data = scipy.io.loadmat(subj_file, simplify_cells=True)
+        train_data = subj_data['EEG_MI_train']
+        test_data = subj_data['EEG_MI_test']
 
-        assert np.array_equal(train_data[8], test_data[8])    # check train and test data have the exact same channels
+        assert np.array_equal(train_data['chan'], test_data['chan'])    # check train and test data have the exact same channels
+        assert np.array_equal(train_data['class'], np.array([['1', 'right'], ['2', 'left']]))  # check if right hand = 1 and left hand = 2 for every subject
+        assert np.array_equal(test_data['class'],  np.array([['1', 'right'], ['2', 'left']]))  # check if right hand = 1 and left hand = 2 for every subject
+
+        # (time, channels) -> (channels, time)
+        train_raw = train_data['x'].transpose(1, 0)
+        test_raw = test_data['x'].transpose(1, 0)
+
+        # normalize
+        train_raw -= np.mean(train_raw, axis=-1, keepdims=True) # / (np.std(train_raw, axis =-1, keepdims=True) + 1e-25)
+        test_raw -= np.mean(test_raw, axis=-1, keepdims=True)
+
+        # volts -> microvolts
+        train_raw *= 1e-6
+        test_raw *= 1e-6
+
+         # create MNE Raw objects
+        info = mne.create_info(['Fp1', 'Fp2', 'F7', 'F3', 'Fz', 'F4', 'F8', 'FC5', 'FC1', 'FC2', 'FC6', 'T7', 'C3', 'Cz', 'C4', 'T8', 'TP9', 'CP5', 'CP1', 'CP2', 'CP6', 'TP10', 'P7', 'P3', 'Pz', 'P4', 'P8', 'PO9', 'O1', 'Oz', 'O2', 'PO10', 'FC3', 'FC4', 'C5', 'C1', 'C2', 'C6', 'CP3', 'CPz', 'CP4', 'P1', 'P2', 'POz', 'FT9', 'FTT9h', 'TTP7h', 'TP7', 'TPP9h', 'FT10', 'FTT10h', 'TPP8h', 'TP8', 'TPP10h', 'F9', 'F10', 'AF7', 'AF3', 'AF4', 'AF8', 'PO3', 'PO4'],
+                               sfreq=1000, ch_types=["eeg"] * 62)
+        
+        train_raw = mne.io.RawArray(train_raw, info)
+        test_raw = mne.io.RawArray(test_raw, info)
+        
+        montage = mne.channels.make_standard_montage("standard_1005")
+        train_raw.set_montage(montage)
+        test_raw.set_montage(montage)
+
+         # create events
+         #TODO do same for train and test
+        train_events_struct = [[idx, 0, id] for idx, id in zip(train_data["t"].squeeze(), train_data["y_logic"][0].squeeze())]       # left_hand = 0, right_hand = 1
+        test_events_struct = [[idx, 0, id] for idx, id in zip(test_data["t"].squeeze(), test_data["y_logic"][0].squeeze())]          # left_hand = 0, right_hand = 1
+        
+        # select channels
+        selected_channels = mne.pick_channels(info.ch_names, include=['Fz', 'FC1', 'FC2', 'C3', 'Cz', 'C4', 'CP1', 'CP2', 'Pz', 'FC3', 'FC4', 'C5', 'C1', 'C2', 'C6', 'CP3', 'CPz', 'CP4', 'P1', 'P2', 'POz'])  # 21 channels common to BCI2017, BCI2019 and BCI IV 2a datasets
+                                                                     
+        # create MNE Epochs
+        train_epochs = mne.Epochs(train_raw, train_events_struct, tmin = -0.5, tmax = 4.0, event_id=dict(left_hand=0, right_hand=1), preload=True, baseline=(-0.5, 0.0), picks=selected_channels)   # 4 sec of stimulus + 1s resting state after
+        test_epochs = mne.Epochs(test_raw, test_events_struct, tmin = -0.5, tmax = 4.0, event_id=dict(left_hand=0, right_hand=1), preload=True, baseline=(-0.5, 0.0), picks=selected_channels)      # 4 sec of stimulus + 1s resting state after
+
+        # reorder
+        train_epochs = train_epochs.reorder_channels(['FC3', 'FC1', 'C1', 'C3', 'C5', 'CP3', 'CP1', 'P1', 'POz', 'Pz', 'CPz', 'Fz', 'FC4', 'FC2', 'Cz', 'C2', 'C4', 'C6', 'CP4', 'CP2', 'P2'])
+        test_epochs = test_epochs.reorder_channels(['FC3', 'FC1', 'C1', 'C3', 'C5', 'CP3', 'CP1', 'P1', 'POz', 'Pz', 'CPz', 'Fz', 'FC4', 'FC2', 'Cz', 'C2', 'C4', 'C6', 'CP4', 'CP2', 'P2'])
+
+        # downsample
+        train_epochs = train_epochs.resample(512)
+        test_epochs = test_epochs.resample(512)
+
+        # remove pre-stimulus (before 0 seconds) data
+        train_epochs = train_epochs.crop(tmin=0, tmax=4)
+        test_epochs = test_epochs.crop(tmin=0, tmax=4)
+
+        # filter
+        train_epochs = train_epochs.filter(l_freq=0.5, h_freq=45)
+        test_epochs = test_epochs.filter(l_freq=0.5, h_freq=45)
+
+        # re-reference
+        train_epochs = train_epochs.set_eeg_reference()
+        test_epochs = test_epochs.set_eeg_reference()
+
+        # ICA
+        #ica = mne.preprocessing.ICA(n_components=21, random_state=42)
+        #ica.fit(train_epochs)
+        #ica.plot_components()
+        #bad_idx, scores = ica.find_bads_eog(epochs1, 'O2', threshold=2)
+        #ica.plot_components();
+        #ica.exclude = [0,1,2,3,4,5,6,7,8,9,10]
+        #ica.apply(train_epochs, exclude=ica.exclude)['left_hand'].average().plot()
+
+        #train_epochs[0].plot()
+        #train_epochs['left_hand'].average().plot()
+        #train_epochs[0].compute_psd().plot()
+        #plt.show(block=True)
+
+        train_labels = train_data['y_logic'][0]
+        test_labels = test_data['y_logic'][0]
+
+        train_data = train_epochs.get_data()
+        test_data = test_epochs.get_data()
+
+        subj_nr = BCI2019.get_subj_name(subj_file)
+
+        #train_data_max_duration = 375 #sec, so 6.25 min (for 5 seconds of data)
+        train_data_max_duration = 300 #sec, so 5 min
+        #train_trials_max_num = int(train_data_max_duration / 4) # 5s is the length of a segment, so we'll have 75 trials
+        train_trials_max_num = int(train_data_max_duration / 4) # 4s is the length of a segment, so we'll have 75 trials for training split
+        
+        valid_data = train_data[train_trials_max_num:]
+        valid_labels = train_labels[train_trials_max_num:]
+        train_data = train_data[:train_trials_max_num]
+        train_labels = train_labels[:train_trials_max_num]
+
+        # First 20 trials for validation, the rest for testing
+        #valid_data = test_data[:20]
+        #valid_labels = test_labels[:20]
+        #test_data = test_data[20:]
+        #test_labels = test_labels[20:]
+
+        train_samples = [{'subject': subj_nr, 'eeg':trial, 'label': train_labels[i], "split": "train"} for i, trial in enumerate(train_data)]
+        valid_samples = [{'subject': subj_nr, 'eeg':trial, 'label': valid_labels[i], "split": "valid"} for i, trial in enumerate(valid_data)]
+        test_samples  = [{'subject': subj_nr, 'eeg':trial, 'label': test_labels[i], "split": "test"} for i, trial in enumerate(test_data)]
+        
+        data = train_samples + valid_samples + test_samples
+
+        # align
+        if align_subjects:
+            data = EEGDataset.align_data(data)
+    
+        return data
+
+    @staticmethod
+    def process_file_deprecated(subj_file, dataset_path = "", test_subject = "", use_continuous_data = False, align_subjects = True, filter_data = False, print_ch_names = False):
+        print("Processing file: ", subj_file)
+        
+        use_moabb = False
+        if use_moabb:
+           import moabb
+           ds = moabb.datasets.Lee2019_MI(sessions=(1,))
+           data = ds.get_data(subjects=[1])
+           data = data[1]['0']['1train']           
+        #   data.plot()
+        #   matplotlib.pyplot.show(block=True)
+        #   import mne
+        #   data = mne.Epochs(data, data.info).get_data()
+           import mne   
+           #events = mne.events_from_annotations(data)
+           events_orig = mne.find_events(data, stim_channel='STI 014')
+           data = data.drop_channels(['EMG1', 'EMG2', 'EMG3', 'EMG4'])
+           data = mne.Epochs(data, None, tmin = 0.0, tmax = 4.0, event_id=dict(left_hand=1, right_hand=2), baseline=None, preload=True)
+           #data.plot(scalings=dict(eeg=1e-4))
+           #plt.show(block=True)
+           # #exit()
+           data = data.get_data()
+           print(data[0][0][-11:-1])
+           print(data[0][1][-11:-1])
+           print(data[1][0][-11:-1])
+           print(data[1][1][-11:-1])
+
+        subj_data = scipy.io.loadmat(subj_file, simplify_cells=True)
+        train_data = subj_data['EEG_MI_train']
+        test_data = subj_data['EEG_MI_test']
+
+        assert np.array_equal(train_data['chan'], test_data['chan'])    # check train and test data have the exact same channels
         
         if print_ch_names:
             BCI2019.print_channel_names(train_data[8][0])  # 8 = index of the channel names
@@ -194,9 +338,13 @@ class BCI2019(EEGDataset):
                 ds[i] = split           
         else:
             for i, split in enumerate(ds):
-                split = np.transpose(split[0], (1, 2, 0))   # (seq_len, trials, channels) -> (trials, channels, seq_len)
+                split = np.transpose(split[0], (1, 2, 0)) * 1e-6   # (seq_len, trials, channels) -> (trials, channels, seq_len)
                 ds[i] = split
-
+        print("====================")
+        print(ds[0][0][0][-10:])
+        print(ds[0][0][1][-10:])
+        print(ds[0][1][0][-10:])
+        print(ds[0][1][1][-10:])
         train_data, test_data = BCI2019.filter_channels(ds,
                                     ['FP1', 'FP2', 'F7', 'F3', 'FZ', 'F4', 'F8', 'FC5', 'FC1', 'FC2', 'FC6', 'T7', 'C3', 'CZ', 'C4', 'T8', 'TP9', 'CP5', 'CP1', 'CP2', 'CP6', 'TP10', 'P7', 'P3', 'PZ', 'P4', 'P8', 'PO9', 'O1', 'OZ', 'O2', 'PO10', 'FC3', 'FC4', 'C5', 'C1', 'C2', 'C6', 'CP3', 'CPZ', 'CP4', 'P1', 'P2', 'POZ', 'FT9', 'FTT9h', 'TTP7h', 'TP7', 'TPP9h', 'FT10', 'FTT10h', 'TPP8h', 'TP8', 'TPP10h', 'F9', 'F10', 'AF7', 'AF3', 'AF4', 'AF8', 'PO3', 'PO4'],
                                     ['FZ', 'FC1', 'FC2', 'C3', 'CZ', 'C4', 'CP1', 'CP2', 'PZ', 'FC3', 'FC4', 'C5', 'C1', 'C2', 'C6', 'CP3', 'CPZ', 'CP4', 'P1', 'P2', 'POZ'])
