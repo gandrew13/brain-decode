@@ -178,7 +178,7 @@ class BCI2017(EEGDataset):
         return train_ds + valid_ds + test_ds
     
     @staticmethod
-    def create_ds(dataset_path, train_subjects, valid_subj, test_subj, random_pretrain_subjects, filter_data = False, align_subjects = True):
+    def create_ds(dataset_path, train_subjects, valid_subj, test_subj, random_pretrain_subjects, filter_data = False, align_subjects = False):
         '''
         Creates a single dataset file out of all the subject files.
         '''
@@ -213,24 +213,36 @@ class BCI2017(EEGDataset):
             # create events
             event_onset_indices = np.where(eeg_data['imagery_event'] == 1)[0]
             events_struct = [[idx, 0, 1] for idx in event_onset_indices]
+            #events_struct_right = [[idx, 0, 2] for idx in event_onset_indices]
 
             # select channels
             selected_channels = mne.pick_channels(info.ch_names, include=['FC3', 'FC1', 'C1', 'C3', 'C5', 'CP3', 'CP1', 'P1', 'POz', 'Pz', 'CPz', 'Fz', 'FC4', 'FC2', 'Cz', 'C2', 'C4', 'C6', 'CP4', 'CP2', 'P2'])  # 21 channels common to BCI2017, BCI2019 and BCI IV 2a datasets
 
             # create MNE Epochs
-            left_hand_epochs = mne.Epochs(left_hand_raw_array, events_struct, tmin = -0.5, tmax = 5.0, event_id=dict(left_hand=1), preload=True, baseline=(-0.5, 0.0), picks=selected_channels)         # 3 sec of stimulus + 2s resting state after
-            right_hand_epochs = mne.Epochs(right_hand_raw_array, events_struct, tmin = -0.5, tmax = 5.0, event_id=dict(right_hand=1), preload=True, baseline=(-0.5, 0.0), picks=selected_channels)      # 3 sec of stimulus + 2s resting state after
+            #left_hand_epochs = mne.Epochs(left_hand_raw_array, events_struct, tmin = -0.5, tmax = 5.0, event_id=dict(left_hand=1), preload=True, baseline=(-0.5, 0.0), picks=selected_channels)         # 3 sec of stimulus + 2s resting state after
+            #right_hand_epochs = mne.Epochs(right_hand_raw_array, events_struct, tmin = -0.5, tmax = 5.0, event_id=dict(right_hand=1), preload=True, baseline=(-0.5, 0.0), picks=selected_channels)      # 3 sec of stimulus + 2s resting state after
+
+            left_hand_epochs = mne.Epochs(left_hand_raw_array, events_struct, tmin = 0.0, tmax = 5.0, event_id=dict(left_hand=1), preload=True, baseline=None, picks=selected_channels)         # 3 sec of stimulus + 2s resting state after
+            right_hand_epochs = mne.Epochs(right_hand_raw_array, events_struct, tmin = 0.0, tmax = 5.0, event_id=dict(right_hand=1), preload=True, baseline=None, picks=selected_channels)      # 3 sec of stimulus + 2s resting state after
 
             # remove pre-stimulus (before 0 seconds) data
-            left_hand_epochs = left_hand_epochs.crop(0, 5)
-            right_hand_epochs = right_hand_epochs.crop(0, 5)
+            #left_hand_epochs = left_hand_epochs.crop(0, 5)     # no need to crop since I removed the pre-stimulus segment
+            #right_hand_epochs = right_hand_epochs.crop(0, 5)
 
             # filter
             left_hand_epochs = left_hand_epochs.filter(0.5, 45)
             right_hand_epochs = right_hand_epochs.filter(0.5, 45)
 
+            # combine epochs
+            #epochs = mne.concatenate_epochs([left_hand_epochs, right_hand_epochs])
+            #epochs = epochs.set_eeg_reference()
+            
+            #left_hand_epochs = epochs['left_hand']
+            #right_hand_epochs = epochs['right_hand']
+
             # re-reference
             left_hand_epochs = left_hand_epochs.set_eeg_reference()
+            right_hand_epochs = right_hand_epochs.set_eeg_reference()
 
             # remove artifacts
             #ica = mne.preprocessing.ICA(n_components=21, random_state=42)
@@ -246,12 +258,12 @@ class BCI2017(EEGDataset):
             right_hand_trials = right_hand_epochs.get_data()
 
             # remove bad trials
-            left_hand_trials, right_hand_trials = BCI2017.elim_bad_trials(left_hand_trials, right_hand_trials, eeg_data['bad_trial_indices'])
+            #left_hand_trials, right_hand_trials = BCI2017.elim_bad_trials(left_hand_trials, right_hand_trials, eeg_data['bad_trial_indices'])
             
             subject = int(eeg_data['subject'].split(' ')[1])
 
-            left_hand_samples = [{'subject': subject, 'eeg':sample, 'label': 0} for sample in left_hand_trials]
-            right_hand_samples = [{'subject': subject, 'eeg':sample, 'label': 1} for sample in right_hand_trials]
+            left_hand_samples = [{'subject': subject, 'eeg':sample, 'task_label': 0, 'subject_label': subject - 1} for sample in left_hand_trials]
+            right_hand_samples = [{'subject': subject, 'eeg':sample, 'task_label': 1, 'subject_label': subject - 1} for sample in right_hand_trials]
 
             if len(left_hand_samples) < 50 or len(right_hand_samples) < 50:
                 print("Subject ", subject, " has too few trials.")

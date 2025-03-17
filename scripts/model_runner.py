@@ -12,6 +12,7 @@ from eeg_datasets.bci_iv_2a import BCIIV2a
 from eeg_datasets.bci2017 import BCI2017
 from eeg_datasets.bci2019 import BCI2019
 from model_wrapper import L, LModelWrapper
+from multi_task_model_wrapper import LMultiTaskModelWrapper
 
 class Runner:
     def __init__(self, args):
@@ -20,7 +21,10 @@ class Runner:
         self.__args = args
 
         self.dataset_loader = self.setup_dataset()
-        self.model = LModelWrapper(self.__args.model, self.__args.load_pretrained, self.__args.freeze_model == 'True', int(self.__args.fine_tune_mode), self.dataset_loader.get_num_classes(), self.dataset_loader.get_num_chans(), self.dataset_loader.get_final_fc_length())        
+        if self.__args.model == 'multi_task':
+            self.model = LMultiTaskModelWrapper(self.__args.model, self.__args.load_pretrained, self.__args.freeze_model == 'True', int(self.__args.fine_tune_mode), (2, 52), self.dataset_loader.get_num_chans(), self.dataset_loader.get_final_fc_length()) # TODO: Don't hardcode the number of classes.
+        else:
+            self.model = LModelWrapper(self.__args.model, self.__args.load_pretrained, self.__args.freeze_model == 'True', int(self.__args.fine_tune_mode), self.dataset_loader.get_num_classes(), self.dataset_loader.get_num_chans(), self.dataset_loader.get_final_fc_length())        
         
         if self.__args.deterministic == 'True':
             self.seed()

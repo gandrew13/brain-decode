@@ -173,7 +173,7 @@ class BCI2019(EEGDataset):
         #    t_res = threads.map(BCI2019.process_file, files)
     
     @staticmethod
-    def process_file(subj_file, dataset_path = "", test_subject = "", use_continuous_data = False, align_subjects = True, filter_data = False, print_ch_names = False):
+    def process_file(subj_file, dataset_path = "", test_subject = "", use_continuous_data = False, align_subjects = False, filter_data = False, print_ch_names = False):
         print("Processing file: ", subj_file)
         subj_data = scipy.io.loadmat(subj_file, simplify_cells=True)
         train_data = subj_data['EEG_MI_train']
@@ -215,8 +215,11 @@ class BCI2019(EEGDataset):
         selected_channels = mne.pick_channels(info.ch_names, include=['Fz', 'FC1', 'FC2', 'C3', 'Cz', 'C4', 'CP1', 'CP2', 'Pz', 'FC3', 'FC4', 'C5', 'C1', 'C2', 'C6', 'CP3', 'CPz', 'CP4', 'P1', 'P2', 'POz'])  # 21 channels common to BCI2017, BCI2019 and BCI IV 2a datasets
                                                                      
         # create MNE Epochs
-        train_epochs = mne.Epochs(train_raw, train_events_struct, tmin = -0.5, tmax = 4.0, event_id=dict(left_hand=0, right_hand=1), preload=True, baseline=(-0.5, 0.0), picks=selected_channels)   # 4 sec of stimulus + 1s resting state after
-        test_epochs = mne.Epochs(test_raw, test_events_struct, tmin = -0.5, tmax = 4.0, event_id=dict(left_hand=0, right_hand=1), preload=True, baseline=(-0.5, 0.0), picks=selected_channels)      # 4 sec of stimulus + 1s resting state after
+        #train_epochs = mne.Epochs(train_raw, train_events_struct, tmin = -0.5, tmax = 4.0, event_id=dict(left_hand=0, right_hand=1), preload=True, baseline=None, picks=selected_channels)   # 4 sec of stimulus + 1s resting state after
+        #test_epochs = mne.Epochs(test_raw, test_events_struct, tmin = -0.5, tmax = 4.0, event_id=dict(left_hand=0, right_hand=1), preload=True, baseline=None, picks=selected_channels)      # 4 sec of stimulus + 1s resting state after
+
+        train_epochs = mne.Epochs(train_raw, train_events_struct, tmin = 0.0, tmax = 4.0, event_id=dict(left_hand=0, right_hand=1), preload=True, baseline=None, picks=selected_channels)   # 4 sec of stimulus + 1s resting state after
+        test_epochs = mne.Epochs(test_raw, test_events_struct, tmin = 0.0, tmax = 4.0, event_id=dict(left_hand=0, right_hand=1), preload=True, baseline=None, picks=selected_channels)      # 4 sec of stimulus + 1s resting state after
 
         # reorder
         train_epochs = train_epochs.reorder_channels(['FC3', 'FC1', 'C1', 'C3', 'C5', 'CP3', 'CP1', 'P1', 'POz', 'Pz', 'CPz', 'Fz', 'FC4', 'FC2', 'Cz', 'C2', 'C4', 'C6', 'CP4', 'CP2', 'P2'])
@@ -227,8 +230,8 @@ class BCI2019(EEGDataset):
         test_epochs = test_epochs.resample(512)
 
         # remove pre-stimulus (before 0 seconds) data
-        train_epochs = train_epochs.crop(tmin=0, tmax=4)
-        test_epochs = test_epochs.crop(tmin=0, tmax=4)
+        #train_epochs = train_epochs.crop(tmin=0, tmax=4)
+        #test_epochs = test_epochs.crop(tmin=0, tmax=4)
 
         # filter
         train_epochs = train_epochs.filter(l_freq=0.5, h_freq=45)
@@ -255,8 +258,8 @@ class BCI2019(EEGDataset):
         train_labels = train_data['y_logic'][0]
         test_labels = test_data['y_logic'][0]
 
-        train_data = train_epochs.get_data()
-        test_data = test_epochs.get_data()
+        train_data = train_epochs.get_data()[:,:,:-1]
+        test_data = test_epochs.get_data()[:,:,:-1]
 
         subj_nr = BCI2019.get_subj_name(subj_file)
 
@@ -276,9 +279,9 @@ class BCI2019(EEGDataset):
         #test_data = test_data[20:]
         #test_labels = test_labels[20:]
 
-        train_samples = [{'subject': subj_nr, 'eeg':trial, 'label': train_labels[i], "split": "train"} for i, trial in enumerate(train_data)]
-        valid_samples = [{'subject': subj_nr, 'eeg':trial, 'label': valid_labels[i], "split": "valid"} for i, trial in enumerate(valid_data)]
-        test_samples  = [{'subject': subj_nr, 'eeg':trial, 'label': test_labels[i], "split": "test"} for i, trial in enumerate(test_data)]
+        train_samples = [{'subject': subj_nr, 'eeg':trial, 'task_label': train_labels[i], 'subject_label':subj_nr-1, "split": "train"} for i, trial in enumerate(train_data)]
+        valid_samples = [{'subject': subj_nr, 'eeg':trial, 'task_label': valid_labels[i], 'subject_label':subj_nr-1, "split": "valid"} for i, trial in enumerate(valid_data)]
+        test_samples  = [{'subject': subj_nr, 'eeg':trial, 'task_label': test_labels[i],  'subject_label':subj_nr-1, "split": "test"} for i, trial in enumerate(test_data)]
         
         data = train_samples + valid_samples + test_samples
 

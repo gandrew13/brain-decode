@@ -1,9 +1,9 @@
 
 from pathlib import Path
 from torch import optim, cuda, save, load
-from torch.nn import CrossEntropyLoss
+from torch.nn import CrossEntropyLoss, BCEWithLogitsLoss
 import lightning as L
-from torchmetrics.classification import Accuracy
+from torchmetrics.classification import Accuracy, BinaryAccuracy
 import braindecode.models as models
 import torch
 
@@ -31,7 +31,7 @@ class LModelWrapper(L.LightningModule):
                                                  torch.nn.Dropout1d(0.5),
                                                  torch.nn.Linear(128, num_classes))
             case _:
-                print("Error: Unknown model!")
+                print("Warning: Unknown model: ", model,  "Make sure this is intended!")
 
         #for name, param in self.model.state_dict().items():
         #    print(name, param.shape)
@@ -217,7 +217,7 @@ class LModelWrapper(L.LightningModule):
                 print("Unfrozen:", name)
 
     def save_model(self):
-        if self.current_epoch % 5 == 0:
+        if self.current_epoch % 2 == 0:
             if self.prev_losses["prev_train_loss"] > self.epoch_loss:
                 print("Saving model in ", self.logger.log_dir)
                 checkpoint = {
