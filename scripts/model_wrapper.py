@@ -72,7 +72,6 @@ class LModelWrapper(L.LightningModule):
         assert self.model.training
         self.step(batch)
         loss = self.loss(self.batch_logits[-1], self.batch_labels[-1])
-
         self.epoch_loss += loss.item()
         #self.my_log(loss.item())
 
@@ -113,13 +112,14 @@ class LModelWrapper(L.LightningModule):
         self.my_log(self.my_log_dict)
 
     def on_validation_epoch_start(self):
-        mean_loss = round(self.epoch_loss / self.trainer.num_training_batches, 3)
+        #mean_loss = self.epoch_loss / self.trainer.num_training_batches
+        mean_loss = [self.epoch_loss[0] / self.trainer.num_training_batches, self.epoch_loss[1] / self.trainer.num_training_batches]
         print("\nMean loss:", mean_loss)
         self.my_log_dict["epoch"] = int(self.current_epoch)
-        self.my_log_dict["train_loss"] = mean_loss
+        self.my_log_dict["train_loss"] = sum(mean_loss)
         self.save_model()
 
-        self.epoch_loss = 0.0
+        self.epoch_loss = [0.0, 0.0]
         
         if self.current_epoch == (self.trainer.max_epochs - 1):
             # compute accuracy on last epoch
@@ -135,9 +135,10 @@ class LModelWrapper(L.LightningModule):
         self.save_best_val_acc_model(val_acc)
         self.my_log_dict["valid_acc"] = val_acc
         print("\nValidation Accuracy:", self.my_log_dict["valid_acc"], "\n")
-        mean_loss = round(self.epoch_loss / self.trainer.num_val_batches[0], 3)
-        self.my_log_dict["eval_loss"] = mean_loss
-        self.epoch_loss = 0.0
+        #mean_loss = round(self.epoch_loss / self.trainer.num_val_batches[0], 3)
+        mean_loss = [self.epoch_loss[0] / self.trainer.num_val_batches[0], self.epoch_loss[1] / self.trainer.num_val_batches[0]] 
+        self.my_log_dict["eval_loss"] = sum(mean_loss)
+        self.epoch_loss = [0.0, 0.0]
 
     def on_test_epoch_start(self):
         best_val_acc_chkp = self.logger.log_dir + "/best_val_acc.pth"
@@ -218,13 +219,17 @@ class LModelWrapper(L.LightningModule):
 
     def save_model(self):
         if self.current_epoch % 2 == 0:
-            if self.prev_losses["prev_train_loss"] > self.epoch_loss:
+            if sum(self.prev_losses["prev_train_loss"]) > sum(self.epoch_loss):     # we might have a list of losses, in case of multi-task scenarios
                 print("Saving model in ", self.logger.log_dir)
                 checkpoint = {
                     "prev_train_loss": self.epoch_loss, 
                     "model":  self.model.state_dict(),
-                    "optimizer": self.optimizers().state_dict()
                 }
+                if isinstance(self.optimizers(), list):     # for alternative training we have 2 optimizers
+                    checkpoint['optimizer_task'] = self.optimizers()[0].state_dict()
+                    checkpoint['optimizer_subjects'] = self.optimizers()[1].state_dict()
+                else:
+                    checkpoint['optimizer'] = self.optimizers().state_dict()
                 Path(self.logger.log_dir).mkdir(parents=True, exist_ok=True)
                 save(checkpoint, self.logger.log_dir + "/best_train_loss.pth")
                 self.prev_losses["prev_train_loss"] = self.epoch_loss
@@ -236,7 +241,11 @@ class LModelWrapper(L.LightningModule):
             checkpoint = {
                 "prev_train_loss": self.epoch_loss, 
                 "model":  self.model.state_dict(),
-                "optimizer": self.optimizers().state_dict()
             }
+            if isinstance(self.optimizers(), list):     # for alternative training we have 2 optimizers
+                checkpoint['optimizer_task'] = self.optimizers()[0].state_dict()
+                checkpoint['optimizer_subjects'] = self.optimizers()[1].state_dict()
+            else:
+                checkpoint['optimizer'] = self.optimizers().state_dict()
             Path(self.logger.log_dir).mkdir(parents=True, exist_ok=True)
             save(checkpoint, self.logger.log_dir + "/best_val_acc.pth")

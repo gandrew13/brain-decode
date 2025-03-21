@@ -123,21 +123,49 @@
                      "--dataset", "bci2019",
                      //"--dataset", "bci2017",
                      //"--model", "eegnet",
-                     "--model", "eegconformer",
+                     //"--model", "eegconformer",
+                     "--model", "multi_task",
                      //"--model", "mlp",
                      "--dataset_path", "Datasets/bci2019/",
                      //"--dataset_path", "Datasets/bci2017/ds.pkl",
-                     "--epochs", "31",
+                     "--epochs", "201",
                      "--batch_size", "32",
-                     "--deterministic", "True",
+                     "--deterministic", "False",
+                     "--num_runs", "1",
                      //"--dataset_path", "Datasets/BCICIV_2a_mat/",
                      //"--dataset_path", "Datasets/EEGImageNet/EEG-ImageNet_full.pth",
-                     "--load_pretrained", "scripts/logs/bci2017_eegconformer/version_46/best_train_loss.pth",     // trained on all BCI2017 subjects
+                     //"--load_pretrained", "scripts/logs/bci2017_eegconformer/version_46/best_train_loss.pth",     // trained on all BCI2017 subjects
+                     //"--load_pretrained", "scripts/logs/bci2017_eegconformer/version_49/best_train_loss.pth",     // trained on all BCI2017 subjects with alignment
+                     //"--load_pretrained", "scripts/logs/bci2017_eegconformer/version_52/best_train_loss.pth",     // trained on all BCI2017 subjects with alignment, 21 channels
+                     //"--load_pretrained", "scripts/logs/bci2017_eegconformer/version_54/best_train_loss.pth",       // trained on all BCI2017 subjects with alignment, 21 channels, no freq ([8. 30]) filtering
+                     //"--load_pretrained", "scripts/logs/bci2019_eegconformer/version_93/best_val_acc.pth",       // trained on all BCI2019 subjects with alignment, 21 channels, no freq ([8. 30]) filtering
+                     //"--load_pretrained", "scripts/logs/bci2019_eegconformer/version_110/best_val_acc.pth",       // trained on all BCI2019 subjects with alignment, 21 channels, no freq ([8. 30]) filtering, except 1                    
+                     //"--load_pretrained", "scripts/logs/bci2019_eegconformer/version_112/best_val_acc.pth",       // trained on all BCI2019 subjects with alignment, 21 channels, no freq ([8. 30]) filtering, except 2                    
+                     //"--load_pretrained", "scripts/logs/bci2019_eegconformer/version_117/best_val_acc.pth",       // trained on all BCI2019 subjects with alignment, 21 channels, no freq ([8. 30]) filtering, except 3                   
+                     //"--load_pretrained", "scripts/logs/bci2019_eegconformer/version_120/best_val_acc.pth",       // trained on all BCI2019 subjects with alignment, 21 channels, no freq ([8. 30]) filtering, except 4                   
+                     //"--load_pretrained", "scripts/logs/bci2019_eegconformer/version_123/best_val_acc.pth",       // trained on all BCI2019 subjects with alignment, 21 channels, no freq ([8. 30]) filtering, except 5                   
+                     //"--load_pretrained", "scripts/logs/bci2019_eegconformer/version_126/best_val_acc.pth",       // trained on all BCI2019 subjects with alignment, 21 channels, no freq ([8. 30]) filtering, except 6                   
+                     //"--load_pretrained", "scripts/logs/bci2019_eegconformer/version_127/best_val_acc.pth",       // trained on all BCI2019 subjects with alignment, 21 channels, no freq ([8. 30]) filtering, except 7                   
+                     //"--load_pretrained", "scripts/logs/bci2019_eegconformer/version_128/best_val_acc.pth",       // trained on all BCI2019 subjects with alignment, 21 channels, no freq ([8. 30]) filtering, except 8                      
+                     //"--load_pretrained", "scripts/logs/bci2019_eegconformer/version_129/best_val_acc.pth",       // trained on all BCI2019 subjects with alignment, 21 channels, no freq ([8. 30]) filtering, except 9                      
+                     //"--load_pretrained", "scripts/logs/bci2019_eegconformer/version_130/best_val_acc.pth",       // trained on all BCI2019 subjects with alignment, 21 channels, no freq ([8. 30]) filtering, except 10                      
+                     //"--load_pretrained", "scripts/logs/bci2019_eegconformer/version_148/best_val_acc.pth",       // trained on all BCI2019 subjects with alignment, 21 channels, no freq ([8. 30]) filtering, except 1                      
+                     //"--load_pretrained", "scripts/logs/bci2017_eegconformer/version_58/best_train_loss.pth",   
+                     //"--load_pretrained", "scripts/logs/bci2017_eegconformer/version_60/best_val_acc.pth",          // using the MNE preprocessing   
+                     //"--load_pretrained", "scripts/logs/bci2017_eegconformer/version_63/best_val_acc.pth",          // using the MNE preprocessing   
+                     //"--load_pretrained", "scripts/logs/bci2017_multi_task/version_28/best_val_acc.pth",            // using the MNE preprocessing + multi-task  
+                     //"--load_pretrained", "scripts/logs/bci2017_multi_task/version_118/best_train_loss.pth",        // using the MNE preprocessing + multi-task  
+                     //"--load_pretrained", "scripts/logs/bci2017_multi_task/version_134/best_train_loss.pth",        // using the MNE preprocessing + multi-task  
+                     //"--load_pretrained", "scripts/logs/bci2017_multi_task/version_137/best_train_loss.pth",        // using the MNE preprocessing + multi-task, with EA, no re-referencing, best one so far (both best train loss and val acc are fine)  
+                     
                      "--freeze_model", "False",
-                     "--fine_tune_mode", "0",       // 1 - full freeze, 2 - classification layer, 3 - all FC layers
+                     "--fine_tune_mode", "0",       // 1 - full freeze, 2 - classification layer, 3 - all FC layers, 4 - only CNN, no transformer, 5 - freeze feature extractor in multi-task
                      "--cross_validation", "False",     // run NR_SUBJECTS experiments by leaving one subject out each time
                      //"--train_subjects", "1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,30,31,33,34,35,36,37,38,39,40,41,42",  // pretrain subjects
-                     "--train_subjects", "01",  // pretrain subjects
+                     "--train_subjects", "1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,30,31,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52",  // pretrain subjects
+                     //"--train_subjects", "01,02,03,04,05,06,07,08,09,10,11,12,13,14,15,16,",  // pretrain subjects
+                     //"--train_subjects", "",  // pretrain subject
+                     //"--train_subjects", "01",  // pretrain subjects
                      //"--train_subjects", "43,44,45,46,47,48,49,50,51,52",  // downstream subjects for fine-tuning
                      "--random_pretrain_subjects", "False",
                      "--valid_subject", "1",    // TODO: this should support a list of subjects

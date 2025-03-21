@@ -6,7 +6,7 @@ import braindecode.models as models
 class GradientReversalFunction(autograd.Function):
     @staticmethod
     def forward(ctx, x, alpha):
-        ctx.save_for_backward(x, alpha)
+        ctx.save_for_backward(x, tensor(alpha, requires_grad=False))
         return x.view_as(x)
     
     @staticmethod
@@ -24,8 +24,8 @@ class GradientReversal(nn.Module):
         super().__init__()
         self.alpha = tensor(alpha, requires_grad = False)
 
-    def forward(self, x):
-        return GradientReversalFunction.apply(x, self.alpha)
+    def forward(self, x, alpha):
+        return GradientReversalFunction.apply(x, alpha)
         
 
 class MultiTaskModel(nn.Module):
@@ -49,23 +49,25 @@ class MultiTaskModel(nn.Module):
                                               #nn.Linear(32, num_classes[0]))     # final classification layer
         
         if self.__is_pretrained == None:
-            self.subject_classifier = nn.Sequential(GradientReversal(alpha=-1.0),          # TODO I modified this !!! I should see when to stop training and save the best model (what does best model mean, best classification of validation labels?)
+            self.GRL = GradientReversal(alpha=-1.0)
+            self.subject_classifier = nn.Sequential(          # TODO I modified this !!! I should see when to stop training and save the best model (what does best model mean, best classification of validation labels?)
                                                     nn.Linear(final_fc_length, 256),
                                                     nn.ELU(),
                                                     nn.Dropout(0.5),
                                                     nn.Linear(256, 32),
                                                     nn.ELU(),
                                                     nn.Dropout(0.3),
-                                                    nn.Linear(32, num_classes[1]))     # final classification layer, 52 subjects
-        
-    def forward(self, x):
-        features = self.feature_extractor(x)
+                                                    nn.Linear(32, num_classes[1]))     # final classification layer, 52 subjects 
 
-        features = features.contiguous().view(features.size(0), -1)
-
-        out_task = self.label_classifier(features)
-        out_subject = None
-        if self.__is_pretrained == None:
-            out_subject = self.subject_classifier(features)
-
-        return out_task, out_subject
+    #def forward(self, x, alpha):
+    #    features = self.feature_extractor(x)
+    #
+    #    features = features.contiguous().view(features.size(0), -1)
+    #
+    #    out_task = self.label_classifier(features)
+    #    out_subject = None
+    #    if self.__is_pretrained == None:
+    #        features = self.GRL(features, alpha)
+    #        out_subject = self.subject_classifier(features)
+    #
+    #    return out_task, out_subject

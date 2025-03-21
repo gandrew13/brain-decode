@@ -173,7 +173,7 @@ class BCI2019(EEGDataset):
         #    t_res = threads.map(BCI2019.process_file, files)
     
     @staticmethod
-    def process_file(subj_file, dataset_path = "", test_subject = "", use_continuous_data = False, align_subjects = False, filter_data = False, print_ch_names = False):
+    def process_file(subj_file, dataset_path = "", test_subject = "", use_continuous_data = False, align_subjects = True, filter_data = False, print_ch_names = False):
         print("Processing file: ", subj_file)
         subj_data = scipy.io.loadmat(subj_file, simplify_cells=True)
         train_data = subj_data['EEG_MI_train']
@@ -215,8 +215,8 @@ class BCI2019(EEGDataset):
         selected_channels = mne.pick_channels(info.ch_names, include=['Fz', 'FC1', 'FC2', 'C3', 'Cz', 'C4', 'CP1', 'CP2', 'Pz', 'FC3', 'FC4', 'C5', 'C1', 'C2', 'C6', 'CP3', 'CPz', 'CP4', 'P1', 'P2', 'POz'])  # 21 channels common to BCI2017, BCI2019 and BCI IV 2a datasets
                                                                      
         # create MNE Epochs
-        #train_epochs = mne.Epochs(train_raw, train_events_struct, tmin = -0.5, tmax = 4.0, event_id=dict(left_hand=0, right_hand=1), preload=True, baseline=None, picks=selected_channels)   # 4 sec of stimulus + 1s resting state after
-        #test_epochs = mne.Epochs(test_raw, test_events_struct, tmin = -0.5, tmax = 4.0, event_id=dict(left_hand=0, right_hand=1), preload=True, baseline=None, picks=selected_channels)      # 4 sec of stimulus + 1s resting state after
+        #train_epochs = mne.Epochs(train_raw, train_events_struct, tmin = -0.5, tmax = 4.0, event_id=dict(left_hand=0, right_hand=1), preload=True, baseline=(-0.5, 0.0), picks=selected_channels)   # 4 sec of stimulus + 1s resting state after
+        #test_epochs = mne.Epochs(test_raw, test_events_struct, tmin = -0.5, tmax = 4.0, event_id=dict(left_hand=0, right_hand=1), preload=True, baseline=(-0.5, 0.0), picks=selected_channels)      # 4 sec of stimulus + 1s resting state after
 
         train_epochs = mne.Epochs(train_raw, train_events_struct, tmin = 0.0, tmax = 4.0, event_id=dict(left_hand=0, right_hand=1), preload=True, baseline=None, picks=selected_channels)   # 4 sec of stimulus + 1s resting state after
         test_epochs = mne.Epochs(test_raw, test_events_struct, tmin = 0.0, tmax = 4.0, event_id=dict(left_hand=0, right_hand=1), preload=True, baseline=None, picks=selected_channels)      # 4 sec of stimulus + 1s resting state after
@@ -238,8 +238,8 @@ class BCI2019(EEGDataset):
         test_epochs = test_epochs.filter(l_freq=0.5, h_freq=45)
 
         # re-reference
-        train_epochs = train_epochs.set_eeg_reference()
-        test_epochs = test_epochs.set_eeg_reference()
+        #train_epochs = train_epochs.set_eeg_reference()
+        #test_epochs = test_epochs.set_eeg_reference()
 
         # ICA
         #ica = mne.preprocessing.ICA(n_components=21, random_state=42)

@@ -1,7 +1,7 @@
 import csv
 import numpy as np
 import matplotlib.pyplot as plt
-from torch import nn, manual_seed, default_generator, backends
+from torch import nn, manual_seed, default_generator, backends, cuda
 from lightning.pytorch.loggers import CSVLogger
 
 
@@ -86,6 +86,7 @@ class Runner:
         np.random.seed(seed)
         np.random.default_rng(seed)
         manual_seed(seed)
+        cuda.manual_seed(seed)
         default_generator.manual_seed(seed)
         backends.cudnn.benchmark = False
         backends.cudnn.deterministic = True

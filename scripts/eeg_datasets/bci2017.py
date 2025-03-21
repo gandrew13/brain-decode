@@ -178,7 +178,7 @@ class BCI2017(EEGDataset):
         return train_ds + valid_ds + test_ds
     
     @staticmethod
-    def create_ds(dataset_path, train_subjects, valid_subj, test_subj, random_pretrain_subjects, filter_data = False, align_subjects = False):
+    def create_ds(dataset_path, train_subjects, valid_subj, test_subj, random_pretrain_subjects, filter_data = False, align_subjects = True):
         '''
         Creates a single dataset file out of all the subject files.
         '''
@@ -199,16 +199,49 @@ class BCI2017(EEGDataset):
             left_hand_trials *= 1e-6
             right_hand_trials *= 1e-6
 
+            #misc = np.hstack((np.zeros((1, left_hand_trials.shape[-1])), np.ones((1, 10)), np.zeros((1, right_hand_trials.shape[-1]))))   # used to separate left and right trials after concatenation
+            #left_hand_trials = np.vstack((left_hand_trials, np.zeros((1, left_hand_trials.shape[-1]))))    # used to separate left and right trials after concatenation
+            #right_hand_trials = np.vstack((right_hand_trials, np.ones((1, right_hand_trials.shape[-1]))))  # used to separate left and right trials after concatenation
+
+            #all_trials = np.concatenate((left_hand_trials, right_hand_trials), axis = 1)
+
             # create MNE raw arrays
+            #info = mne.create_info(['Fp1', 'AF7', 'AF3', 'F1', 'F3', 'F5', 'F7', 'FT7', 'FC5', 'FC3', 'FC1', 'C1', 'C3', 'C5', 'T7', 'TP7', 'CP5', 'CP3', 'CP1', 'P1', 'P3', 'P5', 'P7', 'P9', 'PO7', 'PO3', 'O1', 'Iz', 'Oz', 'POz', 'Pz', 'CPz', 'Fpz', 'Fp2', 'AF8', 'AF4', 'AFz', 'Fz', 'F2', 'F4', 'F6', 'F8', 'FT8', 'FC6', 'FC4', 'FC2', 'FCz', 'Cz', 'C2', 'C4', 'C6', 'T8', 'TP8', 'CP6', 'CP4', 'CP2', 'P2', 'P4', 'P6', 'P8', 'P10', 'PO8', 'PO4', 'O2', 'misc'],
+            #                       sfreq=512, ch_types=["eeg"] * 64 + ['misc'])
+            
             info = mne.create_info(['Fp1', 'AF7', 'AF3', 'F1', 'F3', 'F5', 'F7', 'FT7', 'FC5', 'FC3', 'FC1', 'C1', 'C3', 'C5', 'T7', 'TP7', 'CP5', 'CP3', 'CP1', 'P1', 'P3', 'P5', 'P7', 'P9', 'PO7', 'PO3', 'O1', 'Iz', 'Oz', 'POz', 'Pz', 'CPz', 'Fpz', 'Fp2', 'AF8', 'AF4', 'AFz', 'Fz', 'F2', 'F4', 'F6', 'F8', 'FT8', 'FC6', 'FC4', 'FC2', 'FCz', 'Cz', 'C2', 'C4', 'C6', 'T8', 'TP8', 'CP6', 'CP4', 'CP2', 'P2', 'P4', 'P6', 'P8', 'P10', 'PO8', 'PO4', 'O2'],
                                    sfreq=512, ch_types=["eeg"] * 64)
             
             left_hand_raw_array = mne.io.RawArray(left_hand_trials, info)
             right_hand_raw_array = mne.io.RawArray(right_hand_trials, info)
+            #raw_array = mne.io.RawArray(all_trials, info)
+
+            #left_hand_raw_array = left_hand_raw_array.pick(['FC3', 'FC1', 'C1', 'C3', 'C5', 'CP3', 'CP1', 'P1', 'POz', 'Pz', 'CPz', 'Fz', 'FC4', 'FC2', 'Cz', 'C2', 'C4', 'C6', 'CP4', 'CP2', 'P2'])
+            #right_hand_raw_array = right_hand_raw_array.pick(['FC3', 'FC1', 'C1', 'C3', 'C5', 'CP3', 'CP1', 'P1', 'POz', 'Pz', 'CPz', 'Fz', 'FC4', 'FC2', 'Cz', 'C2', 'C4', 'C6', 'CP4', 'CP2', 'P2'])
+            #raw_array = raw_array.pick(['FC3', 'FC1', 'C1', 'C3', 'C5', 'CP3', 'CP1', 'P1', 'POz', 'Pz', 'CPz', 'Fz', 'FC4', 'FC2', 'Cz', 'C2', 'C4', 'C6', 'CP4', 'CP2', 'P2', 'misc'])
+            #raw_array = raw_array.pick(['FC3', 'FC1', 'C1', 'C3', 'C5', 'CP3', 'CP1', 'P1', 'POz', 'Pz', 'CPz', 'Fz', 'FC4', 'FC2', 'Cz', 'C2', 'C4', 'C6', 'CP4', 'CP2', 'P2'])
+
+            #left_hand_raw_array = left_hand_raw_array.filter(0.5, 45)
+            #right_hand_raw_array = right_hand_raw_array.filter(0.5, 45)
+            #raw_array = raw_array.filter(l_freq=0.5, h_freq=45, picks=['FC3', 'FC1', 'C1', 'C3', 'C5', 'CP3', 'CP1', 'P1', 'POz', 'Pz', 'CPz', 'Fz', 'FC4', 'FC2', 'Cz', 'C2', 'C4', 'C6', 'CP4', 'CP2', 'P2'])
+            
+            #left_hand_raw_array = left_hand_raw_array.set_eeg_reference()
+            #right_hand_raw_array = right_hand_raw_array.set_eeg_reference()
+            #raw_array = raw_array.set_eeg_reference(ch_type=['eeg'])
+            #raw_array = raw_array.set_eeg_reference()
             
             montage = mne.channels.make_standard_montage("standard_1005")
             left_hand_raw_array.set_montage(montage)
             right_hand_raw_array.set_montage(montage)
+            #raw_array.set_montage(montage)
+
+            #left_hand_raw_array, _ = raw_array[:,:left_hand_trials.shape[-1]]
+            #right_hand_raw_array, _ = raw_array[:,left_hand_trials.shape[-1]:]
+
+            #info = mne.create_info(['FC3', 'FC1', 'C1', 'C3', 'C5', 'CP3', 'CP1', 'P1', 'POz', 'Pz', 'CPz', 'Fz', 'FC4', 'FC2', 'Cz', 'C2', 'C4', 'C6', 'CP4', 'CP2', 'P2'],
+            #                       sfreq=512, ch_types=["eeg"] * 21)
+            #left_hand_raw_array = mne.io.RawArray(left_hand_raw_array, info)
+            #right_hand_raw_array = mne.io.RawArray(right_hand_raw_array, info)
 
             # create events
             event_onset_indices = np.where(eeg_data['imagery_event'] == 1)[0]
@@ -241,8 +274,8 @@ class BCI2017(EEGDataset):
             #right_hand_epochs = epochs['right_hand']
 
             # re-reference
-            left_hand_epochs = left_hand_epochs.set_eeg_reference()
-            right_hand_epochs = right_hand_epochs.set_eeg_reference()
+            #left_hand_epochs = left_hand_epochs.set_eeg_reference()
+            #right_hand_epochs = right_hand_epochs.set_eeg_reference()
 
             # remove artifacts
             #ica = mne.preprocessing.ICA(n_components=21, random_state=42)
@@ -259,7 +292,16 @@ class BCI2017(EEGDataset):
 
             # remove bad trials
             #left_hand_trials, right_hand_trials = BCI2017.elim_bad_trials(left_hand_trials, right_hand_trials, eeg_data['bad_trial_indices'])
+
+            #left_hand_epochs = mne.EpochsArray(left_hand_trials, left_hand_epochs.info, baseline=None)         # 3 sec of stimulus + 2s resting state after
+            #right_hand_epochs = mne.EpochsArray(right_hand_trials, right_hand_epochs.info, baseline=None)      # 3 sec of stimulus + 2s resting state after
             
+            #left_hand_epochs = left_hand_epochs.set_eeg_reference()
+            #right_hand_epochs = right_hand_epochs.set_eeg_reference()
+
+            #left_hand_trials = left_hand_epochs.get_data()
+            #right_hand_trials = right_hand_epochs.get_data()
+
             subject = int(eeg_data['subject'].split(' ')[1])
 
             left_hand_samples = [{'subject': subject, 'eeg':sample, 'task_label': 0, 'subject_label': subject - 1} for sample in left_hand_trials]
