@@ -98,7 +98,6 @@ class EEGDataset(Dataset):
 
     @staticmethod
     def setup(dataset_path: list, final_fc_length, batch_size):
-        # TODO: WIP, finish the function, this should be a common setup() function for all datasets
         train_ds = []
         valid_ds = []
         test_ds = []

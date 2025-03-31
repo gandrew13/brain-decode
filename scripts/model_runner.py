@@ -11,6 +11,7 @@ from eeg_datasets.eegimagenet import EEGImageNetDataset
 from eeg_datasets.bci_iv_2a import BCIIV2a
 from eeg_datasets.bci2017 import BCI2017
 from eeg_datasets.bci2019 import BCI2019
+from eeg_datasets.physionet import PhysioNet
 from model_wrapper import L, LModelWrapper
 from multi_task_model_wrapper import LMultiTaskModelWrapper
 
@@ -22,7 +23,7 @@ class Runner:
 
         self.dataset_loader = self.setup_dataset()
         if self.__args.model == 'multi_task':
-            self.model = LMultiTaskModelWrapper(self.__args.model, self.__args.load_pretrained, self.__args.freeze_model == 'True', int(self.__args.fine_tune_mode), (2, 52), self.dataset_loader.get_num_chans(), self.dataset_loader.get_final_fc_length()) # TODO: Don't hardcode the number of classes.
+            self.model = LMultiTaskModelWrapper(self.__args.model, self.__args.load_pretrained, self.__args.freeze_model == 'True', int(self.__args.fine_tune_mode), (2, 158), self.dataset_loader.get_num_chans(), self.dataset_loader.get_final_fc_length()) # TODO: Don't hardcode the number of classes.
         else:
             self.model = LModelWrapper(self.__args.model, self.__args.load_pretrained, self.__args.freeze_model == 'True', int(self.__args.fine_tune_mode), self.dataset_loader.get_num_classes(), self.dataset_loader.get_num_chans(), self.dataset_loader.get_final_fc_length())        
         
@@ -50,8 +51,10 @@ class Runner:
                 return BCI2017.setup(self.__args.dataset_path, self.__args.train_subjects, self.__args.random_pretrain_subjects, self.__args.valid_subject, self.__args.test_subject, self.__args.batch_size)
             case "bci2019":
                 return BCI2019.setup(self.__args.dataset_path, self.__args.train_subjects, self.__args.test_subject, self.__args.batch_size)
-            case "bci2017,bci2019":
-                return EEGDataset.setup(self.__args.dataset_path, self.__args.batch_size)   # TODO, load 2 datasets for pretraining, WIP
+            case "physionet":
+                return PhysioNet.setup(self.__args.dataset_path, self.__args.batch_size)
+            case "multi_dataset":
+                return EEGDataset.setup(self.__args.dataset_path.split(','), 1880, self.__args.batch_size)
             case _:
                 print("Error: Unknown dataset!")
 

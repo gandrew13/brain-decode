@@ -55,7 +55,8 @@ class BCI2019(EEGDataset):
     
     def get_final_fc_length(self):
         # return 10440 # TODO: don't hardcode this, compute it based on the transformer output
-        return 5200 # TODO: don't hardcode this, compute it based on the transformer output
+        #return 5200 # TODO: don't hardcode this, compute it based on the transformer output
+        return 1480 # TODO: don't hardcode this, compute it based on the transformer output
         #return 6600 # TODO: don't hardcode this, compute it based on the transformer output
     
     def plot(self):
@@ -226,8 +227,8 @@ class BCI2019(EEGDataset):
         test_epochs = test_epochs.reorder_channels(['FC3', 'FC1', 'C1', 'C3', 'C5', 'CP3', 'CP1', 'P1', 'POz', 'Pz', 'CPz', 'Fz', 'FC4', 'FC2', 'Cz', 'C2', 'C4', 'C6', 'CP4', 'CP2', 'P2'])
 
         # downsample
-        train_epochs = train_epochs.resample(512)
-        test_epochs = test_epochs.resample(512)
+        train_epochs = train_epochs.resample(160)
+        test_epochs = test_epochs.resample(160)
 
         # remove pre-stimulus (before 0 seconds) data
         #train_epochs = train_epochs.crop(tmin=0, tmax=4)

@@ -232,7 +232,7 @@ class LMultiTaskModelWrapper(LModelWrapper):
 
     def configure_optimizers(self):
         if self.automatic_optimization:
-            opt = optim.AdamW(self.model.parameters(), lr=1e-4)     # best for training on 2017 so far
+            opt = optim.AdamW(self.model.parameters(), lr=1e-4)     # best for training on 2017 so far, also maybe use LRO for fine-tuning
             #opt = optim.AdamW(self.model.parameters(), lr=1e-5)
             #opt = optim.SGD(self.parameters(), lr=0.001, weight_decay=0.001, momentum=0.9)
             return opt
@@ -293,5 +293,10 @@ class LMultiTaskModelWrapper(LModelWrapper):
                 for name, params in self.model.feature_extractor.named_parameters():
                     print("Frozen: ", name)
                     params.requires_grad = False
+            case 6:
+                for name, params in self.model.feature_extractor.patch_embedding.named_parameters():
+                        print("Frozen: ", name)
+                        params.requires_grad = False
             case _:
+                print("Error: Wrong freezing option")
                 return # do nothing

@@ -262,6 +262,10 @@ class BCI2017(EEGDataset):
             #left_hand_epochs = left_hand_epochs.crop(0, 5)     # no need to crop since I removed the pre-stimulus segment
             #right_hand_epochs = right_hand_epochs.crop(0, 5)
 
+            # downsample, to match PhysioNet at 160 Hz
+            left_hand_epochs = left_hand_epochs.resample(160)
+            right_hand_epochs = right_hand_epochs.resample(160)
+
             # filter
             left_hand_epochs = left_hand_epochs.filter(0.5, 45)
             right_hand_epochs = right_hand_epochs.filter(0.5, 45)
@@ -304,8 +308,10 @@ class BCI2017(EEGDataset):
 
             subject = int(eeg_data['subject'].split(' ')[1])
 
-            left_hand_samples = [{'subject': subject, 'eeg':sample, 'task_label': 0, 'subject_label': subject - 1} for sample in left_hand_trials]
-            right_hand_samples = [{'subject': subject, 'eeg':sample, 'task_label': 1, 'subject_label': subject - 1} for sample in right_hand_trials]
+            # 106 = 109 subjects from PhysioNet - 3 subjects which are bad - 1 because the indexing in PhysioNet starts from 0, so first subject index here should be 106.
+            # This is used only for multi-source datasets training.
+            left_hand_samples = [{'subject': subject, 'eeg':sample, 'task_label': 0, 'dataset_label':  1, 'subject_label': 106 + subject - 1} for sample in left_hand_trials]
+            right_hand_samples = [{'subject': subject, 'eeg':sample, 'task_label': 1, 'dataset_label': 1, 'subject_label': 106 + subject - 1} for sample in right_hand_trials]
 
             if len(left_hand_samples) < 50 or len(right_hand_samples) < 50:
                 print("Subject ", subject, " has too few trials.")
