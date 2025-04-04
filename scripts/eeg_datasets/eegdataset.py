@@ -106,6 +106,7 @@ class EEGDataset(Dataset):
             ds = None
             with open(file, "rb") as f:
                 ds = pickle.load(f)
+            print("Full dataset length: ", len(ds))
             for sample in ds:
                 match sample['split']:
                     case 'train':
@@ -117,9 +118,9 @@ class EEGDataset(Dataset):
                     case _:
                         print("Error: No dataset split specified for sample.")
 
-        train_ds = EEGDataset(train_ds, [(entry['task_label'], entry['subject_label']) for entry in train_ds], final_fc_length, [], ['FC3', 'FC1', 'C1', 'C3', 'C5', 'CP3', 'CP1', 'P1', 'POZ', 'PZ', 'CPZ', 'FZ', 'FC4', 'FC2', 'CZ', 'C2', 'C4', 'C6', 'CP4', 'CP2', 'P2'])
-        valid_ds = EEGDataset(valid_ds, [(entry['task_label'], entry['subject_label']) for entry in valid_ds], final_fc_length, [], ['FC3', 'FC1', 'C1', 'C3', 'C5', 'CP3', 'CP1', 'P1', 'POZ', 'PZ', 'CPZ', 'FZ', 'FC4', 'FC2', 'CZ', 'C2', 'C4', 'C6', 'CP4', 'CP2', 'P2'])
-        test_ds  = EEGDataset(test_ds,  [(entry['task_label'], entry['subject_label']) for entry in test_ds],  final_fc_length, [], ['FC3', 'FC1', 'C1', 'C3', 'C5', 'CP3', 'CP1', 'P1', 'POZ', 'PZ', 'CPZ', 'FZ', 'FC4', 'FC2', 'CZ', 'C2', 'C4', 'C6', 'CP4', 'CP2', 'P2'])
+        train_ds = EEGDataset(train_ds, [(entry['task_label'], entry['subject_label'], entry['dataset_label']) for entry in train_ds], final_fc_length, [], ['FC3', 'FC1', 'C1', 'C3', 'C5', 'CP3', 'CP1', 'P1', 'POZ', 'PZ', 'CPZ', 'FZ', 'FC4', 'FC2', 'CZ', 'C2', 'C4', 'C6', 'CP4', 'CP2', 'P2'])
+        valid_ds = EEGDataset(valid_ds, [(entry['task_label'], entry['subject_label'], entry['dataset_label']) for entry in valid_ds], final_fc_length, [], ['FC3', 'FC1', 'C1', 'C3', 'C5', 'CP3', 'CP1', 'P1', 'POZ', 'PZ', 'CPZ', 'FZ', 'FC4', 'FC2', 'CZ', 'C2', 'C4', 'C6', 'CP4', 'CP2', 'P2'])
+        test_ds  = EEGDataset(test_ds,  [(entry['task_label'], entry['subject_label'], entry['dataset_label']) for entry in test_ds],  final_fc_length, [], ['FC3', 'FC1', 'C1', 'C3', 'C5', 'CP3', 'CP1', 'P1', 'POZ', 'PZ', 'CPZ', 'FZ', 'FC4', 'FC2', 'CZ', 'C2', 'C4', 'C6', 'CP4', 'CP2', 'P2'])
 
         return EEGDataModule(train_ds, valid_ds, test_ds, int(batch_size))
     

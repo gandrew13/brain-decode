@@ -86,6 +86,7 @@ class PhysioNet(EEGDataset):
                     runs.append(data)
             
             # concat the 3 hand imagery runs
+            # TODO: not sure if I should do this, not sure if the events are concatenated correctly, to check
             raw = mne.concatenate_raws(runs, preload = True)
 
             #print(raw.ch_names)
@@ -102,11 +103,11 @@ class PhysioNet(EEGDataset):
             #(events_from_annot, event_dict) = mne.events_from_annotations(runs[0], event_id={"left_hand":1, "rest":2, "right_hand":3})
 
             if sub_nr > 104:        # leave a few subjects for validation
-                left_hand_samples = [{'subject': sub_nr, 'eeg':sample, 'task_label': 0, 'subject_label': subj_id, 'domain_label': 0, 'split': 'valid'} for sample in left_hand_trials]
-                right_hand_samples = [{'subject': sub_nr, 'eeg':sample, 'task_label': 1, 'subject_label': subj_id, 'domain_label': 0, 'split': 'valid'} for sample in right_hand_trials]
+                left_hand_samples = [{'subject': sub_nr, 'eeg':sample, 'task_label': 0, 'subject_label': subj_id, 'dataset_label': 0, 'split': 'valid'} for sample in left_hand_trials]
+                right_hand_samples = [{'subject': sub_nr, 'eeg':sample, 'task_label': 1, 'subject_label': subj_id, 'dataset_label': 0, 'split': 'valid'} for sample in right_hand_trials]
             else:
-                left_hand_samples = [{'subject': sub_nr, 'eeg':sample, 'task_label': 0, 'subject_label': subj_id, 'domain_label': 0, 'split': 'train'} for sample in left_hand_trials]
-                right_hand_samples = [{'subject': sub_nr, 'eeg':sample, 'task_label': 1, 'subject_label': subj_id, 'domain_label': 0, 'split': 'train'} for sample in right_hand_trials]
+                left_hand_samples = [{'subject': sub_nr, 'eeg':sample, 'task_label': 0, 'subject_label': subj_id, 'dataset_label': 0, 'split': 'train'} for sample in left_hand_trials]
+                right_hand_samples = [{'subject': sub_nr, 'eeg':sample, 'task_label': 1, 'subject_label': subj_id, 'dataset_label': 0, 'split': 'train'} for sample in right_hand_trials]
 
             data = left_hand_samples + right_hand_samples
             print("Nr. trials:", len(data), end = "      ")
