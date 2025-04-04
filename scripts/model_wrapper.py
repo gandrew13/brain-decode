@@ -55,9 +55,9 @@ class LModelWrapper(L.LightningModule):
         self.valid_accuracy = Accuracy(task="multiclass", num_classes=num_classes)
         self.test_accuracy = Accuracy(task="multiclass", num_classes=num_classes)
 
-        self.epoch_loss = 0.0
+        self.epoch_loss = [0.0]
 
-        self.prev_losses = {"prev_train_loss": self.__checkpoint["prev_train_loss"] if pretrained_model and "prev_train_loss" in self.__checkpoint else 100000.0, "prev_eval_loss": 100000.0}
+        self.prev_losses = {"prev_train_loss": self.__checkpoint["prev_train_loss"] if pretrained_model and "prev_train_loss" in self.__checkpoint else [100000.0], "prev_eval_loss": 100000.0}
 
         #self.batch_results = {"train_batch_logits": [], "train_batch_labels": [], "valid_batch_logits": [], "valid_batch_labels": []}
 
@@ -72,7 +72,7 @@ class LModelWrapper(L.LightningModule):
         assert self.model.training
         self.step(batch)
         loss = self.loss(self.batch_logits[-1], self.batch_labels[-1])
-        self.epoch_loss += loss.item()
+        self.epoch_loss[0] += loss.item()
         #self.my_log(loss.item())
 
         return loss
@@ -81,7 +81,7 @@ class LModelWrapper(L.LightningModule):
         assert not self.model.training
         self.step(batch)
         loss = self.eval_loss(self.batch_logits[-1], self.batch_labels[-1])
-        self.epoch_loss += loss.item()
+        self.epoch_loss[0] += loss.item()
 
     def test_step(self, batch, batch_idx):
         assert not self.model.training
@@ -112,14 +112,13 @@ class LModelWrapper(L.LightningModule):
         self.my_log(self.my_log_dict)
 
     def on_validation_epoch_start(self):
-        #mean_loss = self.epoch_loss / self.trainer.num_training_batches
-        mean_loss = [self.epoch_loss[0] / self.trainer.num_training_batches, self.epoch_loss[1] / self.trainer.num_training_batches]
+        mean_loss = [loss / self.trainer.num_training_batches for loss in self.epoch_loss]
         print("\nMean loss:", mean_loss)
         self.my_log_dict["epoch"] = int(self.current_epoch)
         self.my_log_dict["train_loss"] = sum(mean_loss)
         self.save_model()
 
-        self.epoch_loss = [0.0, 0.0]
+        self.epoch_loss = [0.0, 0.0, 0.0]   # task, discriminator, reconstruction losses
         
         if self.current_epoch == (self.trainer.max_epochs - 1):
             # compute accuracy on last epoch
@@ -135,10 +134,9 @@ class LModelWrapper(L.LightningModule):
         self.save_best_val_acc_model(val_acc)
         self.my_log_dict["valid_acc"] = val_acc
         print("\nValidation Accuracy:", self.my_log_dict["valid_acc"], "\n")
-        #mean_loss = round(self.epoch_loss / self.trainer.num_val_batches[0], 3)
-        mean_loss = [self.epoch_loss[0] / self.trainer.num_val_batches[0], self.epoch_loss[1] / self.trainer.num_val_batches[0]] 
+        mean_loss = [round(loss / self.trainer.num_val_batches[0], 4) for loss in self.epoch_loss]
         self.my_log_dict["eval_loss"] = sum(mean_loss)
-        self.epoch_loss = [0.0, 0.0]
+        self.epoch_loss = [0.0, 0.0, 0.0]   # task, discriminator, reconstruction losses
 
     def on_test_epoch_start(self):
         best_val_acc_chkp = self.logger.log_dir + "/best_val_acc.pth"
@@ -162,7 +160,7 @@ class LModelWrapper(L.LightningModule):
         Process (forward propagate) a batch.
         '''
         inputs, labels = batch
-        inputs, labels = inputs.type(cuda.FloatTensor), labels.type(cuda.LongTensor)
+        inputs, labels = inputs.type(cuda.FloatTensor), labels[0].type(cuda.LongTensor)
         out = self.model(inputs)
         self.batch_logits.append(out)
         self.batch_labels.append(labels)
@@ -219,7 +217,7 @@ class LModelWrapper(L.LightningModule):
 
     def save_model(self):
         if self.current_epoch % 2 == 0:
-            if sum(self.prev_losses["prev_train_loss"]) > sum(self.epoch_loss):     # we might have a list of losses, in case of multi-task scenarios
+            if self.prev_losses["prev_train_loss"][0] > self.epoch_loss[0]:     # compare by task loss only
                 print("Saving model in ", self.logger.log_dir)
                 checkpoint = {
                     "prev_train_loss": self.epoch_loss, 
