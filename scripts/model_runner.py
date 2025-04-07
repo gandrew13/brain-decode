@@ -46,7 +46,7 @@ class Runner:
             case "alljoined1":
                 return Alljoined1.setup()
             case "bci_iv_2a":
-                return BCIIV2a.setup(self.__args.dataset_path)
+                return BCIIV2a.setup(self.__args.dataset_path, self.__args.train_subjects, self.__args.batch_size)
             case "bci2017":
                 return BCI2017.setup(self.__args.dataset_path, self.__args.train_subjects, self.__args.random_pretrain_subjects, self.__args.valid_subject, self.__args.test_subject, self.__args.batch_size)
             case "bci2019":

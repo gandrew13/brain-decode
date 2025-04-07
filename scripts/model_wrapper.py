@@ -115,7 +115,7 @@ class LModelWrapper(L.LightningModule):
         mean_loss = [loss / self.trainer.num_training_batches for loss in self.epoch_loss]
         print("\nMean loss:", mean_loss)
         self.my_log_dict["epoch"] = int(self.current_epoch)
-        self.my_log_dict["train_loss"] = sum(mean_loss)
+        self.my_log_dict["train_loss"] = sum(mean_loss)     # TODO: find a way to log lists
         self.save_model()
 
         self.epoch_loss = [0.0, 0.0, 0.0]   # task, discriminator, reconstruction losses
@@ -135,7 +135,7 @@ class LModelWrapper(L.LightningModule):
         self.my_log_dict["valid_acc"] = val_acc
         print("\nValidation Accuracy:", self.my_log_dict["valid_acc"], "\n")
         mean_loss = [round(loss / self.trainer.num_val_batches[0], 4) for loss in self.epoch_loss]
-        self.my_log_dict["eval_loss"] = sum(mean_loss)
+        self.my_log_dict["eval_loss"] = sum(mean_loss)      # TODO: find a way to log lists
         self.epoch_loss = [0.0, 0.0, 0.0]   # task, discriminator, reconstruction losses
 
     def on_test_epoch_start(self):
