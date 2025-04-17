@@ -48,12 +48,15 @@ class LModelWrapper(L.LightningModule):
         if freeze_model:
             self.freeze(fine_tune_mode)
 
-        self.loss = CrossEntropyLoss()
-        self.eval_loss = CrossEntropyLoss()
+        #self.loss = CrossEntropyLoss()
+        #self.eval_loss = CrossEntropyLoss()
         
-        self.train_accuracy = Accuracy(task="multiclass", num_classes=num_classes)
-        self.valid_accuracy = Accuracy(task="multiclass", num_classes=num_classes)
-        self.test_accuracy = Accuracy(task="multiclass", num_classes=num_classes)
+        self.loss = BCEWithLogitsLoss()
+        self.eval_loss = BCEWithLogitsLoss()
+        
+        self.train_accuracy = Accuracy(task="binary", num_classes=num_classes)
+        self.valid_accuracy = Accuracy(task="binary", num_classes=num_classes)
+        self.test_accuracy = Accuracy(task="binary", num_classes=num_classes)
 
         self.epoch_loss = [0.0]
 
@@ -71,7 +74,7 @@ class LModelWrapper(L.LightningModule):
     def training_step(self, batch, batch_idx):
         assert self.model.training
         self.step(batch)
-        loss = self.loss(self.batch_logits[-1], self.batch_labels[-1])
+        loss = self.loss(self.batch_logits[-1], self.batch_labels[-1].type(cuda.FloatTensor))
         self.epoch_loss[0] += loss.item()
         #self.my_log(loss.item())
 
@@ -80,7 +83,7 @@ class LModelWrapper(L.LightningModule):
     def validation_step(self, batch, batch_idx):
         assert not self.model.training
         self.step(batch)
-        loss = self.eval_loss(self.batch_logits[-1], self.batch_labels[-1])
+        loss = self.eval_loss(self.batch_logits[-1], self.batch_labels[-1].type(cuda.FloatTensor))
         self.epoch_loss[0] += loss.item()
 
     def test_step(self, batch, batch_idx):

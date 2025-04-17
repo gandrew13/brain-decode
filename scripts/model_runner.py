@@ -23,9 +23,9 @@ class Runner:
 
         self.dataset_loader = self.setup_dataset()
         if self.__args.model == 'multi_task':
-            self.model = LMultiTaskModelWrapper(self.__args.model, self.__args.load_pretrained, self.__args.freeze_model == 'True', int(self.__args.fine_tune_mode), (2, 158), self.dataset_loader.get_num_chans(), self.dataset_loader.get_final_fc_length()) # TODO: Don't hardcode the number of classes.
+            self.model = LMultiTaskModelWrapper(self.__args.model, self.__args.load_pretrained, self.__args.freeze_model == 'True', int(self.__args.fine_tune_mode), (2, 3), self.dataset_loader.get_num_chans(), self.dataset_loader.get_final_fc_length()) # TODO: Don't hardcode the number of classes. (2 task classes, 2 for datasets discriminator) or (2 task classes, 3 for datasets discriminator) or (2 task classes, 158 for subjects discriminator)
         else:
-            self.model = LModelWrapper(self.__args.model, self.__args.load_pretrained, self.__args.freeze_model == 'True', int(self.__args.fine_tune_mode), self.dataset_loader.get_num_classes(), self.dataset_loader.get_num_chans(), self.dataset_loader.get_final_fc_length())        
+            self.model = LModelWrapper(self.__args.model, self.__args.load_pretrained, self.__args.freeze_model == 'True', int(self.__args.fine_tune_mode), 1, self.dataset_loader.get_num_chans(), self.dataset_loader.get_final_fc_length()) # binary classification, so one output neuron only
         
         if self.__args.deterministic == 'True':
             self.seed()

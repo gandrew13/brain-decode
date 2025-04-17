@@ -107,7 +107,13 @@ class EEGDataset(Dataset):
             with open(file, "rb") as f:
                 ds = pickle.load(f)
             print("Full dataset length: ", len(ds))
+            #d = {}
             for sample in ds:
+                # store number of trials per subject
+                #if sample['subject'] not in d:
+                #    d[sample['subject']] = 0
+                #d[sample['subject']] += 1
+
                 match sample['split']:
                     case 'train':
                         train_ds.append(sample)
@@ -117,7 +123,8 @@ class EEGDataset(Dataset):
                         test_ds.append(sample)
                     case _:
                         print("Error: No dataset split specified for sample.")
-
+            #for sub in d:
+            #    print(sub, d[sub])
         train_ds = EEGDataset(train_ds, [(entry['task_label'], entry['subject_label'], entry['dataset_label']) for entry in train_ds], final_fc_length, [], ['FC3', 'FC1', 'C1', 'C3', 'C5', 'CP3', 'CP1', 'P1', 'POZ', 'PZ', 'CPZ', 'FZ', 'FC4', 'FC2', 'CZ', 'C2', 'C4', 'C6', 'CP4', 'CP2', 'P2'])
         valid_ds = EEGDataset(valid_ds, [(entry['task_label'], entry['subject_label'], entry['dataset_label']) for entry in valid_ds], final_fc_length, [], ['FC3', 'FC1', 'C1', 'C3', 'C5', 'CP3', 'CP1', 'P1', 'POZ', 'PZ', 'CPZ', 'FZ', 'FC4', 'FC2', 'CZ', 'C2', 'C4', 'C6', 'CP4', 'CP2', 'P2'])
         test_ds  = EEGDataset(test_ds,  [(entry['task_label'], entry['subject_label'], entry['dataset_label']) for entry in test_ds],  final_fc_length, [], ['FC3', 'FC1', 'C1', 'C3', 'C5', 'CP3', 'CP1', 'P1', 'POZ', 'PZ', 'CPZ', 'FZ', 'FC4', 'FC2', 'CZ', 'C2', 'C4', 'C6', 'CP4', 'CP2', 'P2'])

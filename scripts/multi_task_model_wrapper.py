@@ -86,7 +86,8 @@ class LMultiTaskModelWrapper(LModelWrapper):
         self.epoch_loss[0] += loss.item()
         if self.__pretrained_model == None:
             subject_logits = self.batch_logits[-1][1]
-            subject_labels = self.batch_labels[-1][1]
+            #subject_labels = self.batch_labels[-1][1]      # subject labels
+            subject_labels = self.batch_labels[-1][2]       # dataset labels
             subject_loss = self.subject_loss(subject_logits, subject_labels)    # subject loss
             self.epoch_loss[1] += subject_loss.item()     
             loss += subject_loss
@@ -112,7 +113,8 @@ class LMultiTaskModelWrapper(LModelWrapper):
         #print("Eval step task loss: ", round(eval_loss.item(), 3))
         self.epoch_loss[0] += eval_loss.item()
         if self.__pretrained_model == None:
-            eval_subject_loss = self.eval_subject_loss(self.batch_logits[-1][1], self.batch_labels[-1][1])
+            #eval_subject_loss = self.eval_subject_loss(self.batch_logits[-1][1], self.batch_labels[-1][1]) # subject labels
+            eval_subject_loss = self.eval_subject_loss(self.batch_logits[-1][1], self.batch_labels[-1][2])  # dataset labels
             self.epoch_loss[1] += eval_subject_loss.item()
             #eval_loss += eval_subject_loss                                                  # eval subject loss
             #print("Eval step subject loss: ", round(eval_subject_loss.item(), 3))
@@ -124,13 +126,13 @@ class LMultiTaskModelWrapper(LModelWrapper):
         Process (forward propagate) a batch.
         '''
         inputs, labels = batch
-        inputs, labels = inputs.type(cuda.FloatTensor), [labels[0].type(cuda.LongTensor), labels[1].type(cuda.LongTensor)]
+        inputs, labels = inputs.type(cuda.FloatTensor), [labels[0].type(cuda.LongTensor), labels[1].type(cuda.LongTensor), labels[2].type(cuda.LongTensor)]
         alpha = 1.0 # default
         if self.training:
             ds_size = self.trainer.num_training_batches
             p = float(batch_idx + self.current_epoch * ds_size) / self.trainer.max_epochs / ds_size
             import numpy as np
-            alpha = 2. / (1. + np.exp(-1.0 * p)) - 1
+            alpha = 2. / (1. + np.exp(-10.0 * p)) - 1
             #alpha = 0.1
 
             if self.current_epoch % 10 == 0 and batch_idx == self.trainer.num_training_batches - 1:
@@ -346,7 +348,8 @@ class LMultiTaskModelWrapper(LModelWrapper):
             out_subject = self.model.subject_classifier(features_disc)
 
             # loss compute
-            subject_labels = labels[1]
+            #subject_labels = labels[1] # subject labels
+            subject_labels = labels[2]  # dataset labels
             subject_loss = self.subject_loss(out_subject, subject_labels)    # subject loss
 
             # backward pass
@@ -371,7 +374,8 @@ class LMultiTaskModelWrapper(LModelWrapper):
         # loss compute
         if self.model.training:
             task_labels = labels[0].type(cuda.FloatTensor)
-            subject_labels = labels[1]
+            #subject_labels = labels[1] # subject labels
+            subject_labels = labels[2]  # dataset labels
             task_loss = self.task_loss(out_task.squeeze(-1), task_labels)           # task loss
             subject_loss = self.subject_loss(out_subject, subject_labels)          # subject loss #TODO: Should I compute this again, or use the one computed above
             loss = task_loss + subject_loss
@@ -390,7 +394,7 @@ class LMultiTaskModelWrapper(LModelWrapper):
             #opt = optim.AdamW(self.model.parameters(), lr=1e-5)
             #opt = optim.SGD(self.parameters(), lr=0.001, weight_decay=0.001, momentum=0.9)
             return opt
-        
+    
             #return {
             #    "optimizer": opt, "lr_scheduler": {"scheduler": optim.lr_scheduler.ReduceLROnPlateau(opt, 'min', 0.5, 10), "interval": "epoch", "frequency": 1, "monitor": "train_loss"}
             #}
@@ -418,10 +422,11 @@ class LMultiTaskModelWrapper(LModelWrapper):
             subject_logits = torch.cat([logit[1] for logit in self.batch_logits])
             subject_logits = torch.argmax(torch.softmax(subject_logits, dim=1), dim=1)
         
-        task_labels = torch.cat([logit[0] for logit in self.batch_labels])
+        task_labels = torch.cat([label[0] for label in self.batch_labels])
 
         if self.__pretrained_model == None:
-            subject_labels = torch.cat([logit[1] for logit in self.batch_labels])
+            #subject_labels = torch.cat([label[1] for label in self.batch_labels])  # subject labels
+            subject_labels = torch.cat([label[2] for label in self.batch_labels])   # dataset labels
 
         self.batch_logits = []
         self.batch_labels = []
@@ -438,6 +443,7 @@ class LMultiTaskModelWrapper(LModelWrapper):
         own_state = self.model.state_dict()
         for name, param in state_dict.items():
             print(name, param.shape)
+            #if 'patch_embedding' in name or 'transformer' in name:     # only load the feature extractor
             try:
                 if isinstance(param, torch.nn.Parameter):
                     # backwards compatibility for serialized parameters
@@ -445,6 +451,15 @@ class LMultiTaskModelWrapper(LModelWrapper):
                 own_state[name].copy_(param)
             except:
                 print("Couldn't load: ", name)
+            
+        #label_classifier_state = self.model.label_classifier.state_dict()
+        #label_classifier_state['0.weight'].copy_(state_dict['fc.fc.0.weight'].data)
+        #label_classifier_state['0.bias'].copy_(state_dict['fc.fc.0.bias'].data)
+        #label_classifier_state['3.weight'].copy_(state_dict['fc.fc.3.weight'].data)
+        #label_classifier_state['3.bias'].copy_(state_dict['fc.fc.3.bias'].data)
+        #print(state_dict['final_layer.final_layer.0.weight'].shape)#.copy_(state_dict['final_layer.final_layer.0.weight'].data)
+        #exit()
+        #label_classifier_state['6.bias'].copy_(state_dict['final_layer.final_layer.0.bias'].data)
     
     def freeze(self, fine_tune_mode):
         match fine_tune_mode:

@@ -165,7 +165,7 @@ class BCI2019(EEGDataset):
         if train_subject:
             files = [dataset_path + "raw/sess01_subj" + train_subject + "_EEG_MI.mat"]
         else:
-            files = list(glob.glob(dataset_path + "raw/" + "*.mat"))
+            files = list(glob.glob(dataset_path + "raw/session1/" + "*.mat")) + list(glob.glob(dataset_path + "raw/session2/" + "*.mat"))
         [ds.extend(BCI2019.process_file(file, dataset_path, test_subject)) for file in files]
 
         with open(dataset_path + "ds" + train_subject + ".pkl", "wb") as f:
@@ -260,20 +260,24 @@ class BCI2019(EEGDataset):
         train_labels = train_data['y_logic'][0]
         test_labels = test_data['y_logic'][0]
 
-        train_data = train_epochs.get_data()[:,:,:-1]
-        test_data = test_epochs.get_data()[:,:,:-1]
+        #train_data = train_epochs.get_data()[:,:,:-1]
+        #test_data = test_epochs.get_data()[:,:,:-1]
+
+        train_data = train_epochs.get_data()
+        test_data = test_epochs.get_data()
 
         subj_nr = BCI2019.get_subj_name(subj_file)
 
-        train_data_max_duration = 375 #sec, so 6.25 min (for 5 seconds of data)
-        #train_data_max_duration = 300 #sec, so 5 min
-        #train_trials_max_num = int(train_data_max_duration / 4) # 5s is the length of a segment, so we'll have 75 trials
-        train_trials_max_num = int(train_data_max_duration / 4) # 4s is the length of a segment, so we'll have 75 trials for training split
+        # for using 2019 as target, for fine-tuning/testing on it
+        #train_data_max_duration = 375 #sec, so 6.25 min (for 5 seconds of data)
+        ##train_data_max_duration = 300 #sec, so 5 min
+        ##train_trials_max_num = int(train_data_max_duration / 4) # 5s is the length of a segment, so we'll have 75 trials
+        #train_trials_max_num = int(train_data_max_duration / 4) # 4s is the length of a segment, so we'll have 75 trials for training split # TODO: this should be 5 not 4, a trial has 5 seconds
         
-        valid_data = train_data[train_trials_max_num:]
-        valid_labels = train_labels[train_trials_max_num:]
-        train_data = train_data[:train_trials_max_num]
-        train_labels = train_labels[:train_trials_max_num]
+        #valid_data = train_data[train_trials_max_num:]
+        #valid_labels = train_labels[train_trials_max_num:]
+        #train_data = train_data[:train_trials_max_num]
+        #train_labels = train_labels[:train_trials_max_num]
 
         # First 20 trials for validation, the rest for testing
         #valid_data = test_data[:20]
@@ -281,13 +285,23 @@ class BCI2019(EEGDataset):
         #test_data = test_data[20:]
         #test_labels = test_labels[20:]
 
+        # for using 2019 as source dataset, pretraining on it
+        split = 70 # 70 trials for train, rest for validation
+        train_data = np.concatenate((train_data, test_data[:split]), axis = 0)
+        train_labels = np.concatenate((train_labels, test_labels[:split]), axis = 0)
+
+        valid_data = test_data[split:]
+        valid_labels = test_labels[split:]
+
         train_samples = [{'subject': subj_nr, 'eeg':trial, 'task_label': train_labels[i], 'subject_label':subj_nr-1, 'dataset_label': 2, "split": "train"} for i, trial in enumerate(train_data)]
         valid_samples = [{'subject': subj_nr, 'eeg':trial, 'task_label': valid_labels[i], 'subject_label':subj_nr-1, 'dataset_label': 2, "split": "valid"} for i, trial in enumerate(valid_data)]
-        test_samples  = [{'subject': subj_nr, 'eeg':trial, 'task_label': test_labels[i],  'subject_label':subj_nr-1, 'dataset_label': 2, "split": "test"} for i, trial in enumerate(test_data)]
+        #test_samples  = [{'subject': subj_nr, 'eeg':trial, 'task_label': test_labels[i],  'subject_label':subj_nr-1, 'dataset_label': 2, "split": "test"} for i, trial in enumerate(test_data)]    # for fine-tuning on this dataset
+        test_samples  = [{'subject': subj_nr, 'eeg':np.zeros((21, 800)), 'task_label': 0,  'subject_label':0, 'dataset_label': 2, "split": "test"}] # no need for test data when pretraining on this dataset, so just use a placeholder
         
-        data = train_samples + valid_samples + test_samples
-
+        data = train_samples + valid_samples# + test_samples
+        
         # align
+        # TODO: Should I read together both sessions for each subject and align them together?
         if align_subjects:
             data = EEGDataset.align_data(data)
     

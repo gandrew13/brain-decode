@@ -53,7 +53,8 @@ class BCI2017(EEGDataset):
     
     def get_final_fc_length(self):
         #return 9320 # TODO: don't hardcode this, compute it based on the transformer output
-        return 6600 # TODO: don't hardcode this, compute it based on the transformer output
+        #return 6600 # TODO: don't hardcode this, compute it based on the transformer output
+        return 1880 # TODO: don't hardcode this, compute it based on the transformer output
     
     def plot(self):
         raw = torch.tensor(self._data[0]['eeg_data']).unsqueeze(0)

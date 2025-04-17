@@ -120,16 +120,21 @@
                      //"--dataset", "bci_iv_2a",
                      //"--dataset", "eegimagenet",
                      //"--dataset", "alljoined1",
-                     "--dataset", "bci2019",
                      //"--dataset", "bci2017",
+                     "--dataset", "bci2019",
+                     //"--dataset", "physionet",
+                     //"--dataset", "multi_dataset",
                      //"--model", "eegnet",
                      //"--model", "eegconformer",
                      "--model", "multi_task",
                      //"--model", "mlp",
-                     "--dataset_path", "Datasets/bci2019/",
+                     //"--dataset_path", "Datasets/physionet/ds.pkl,Datasets/bci2017/ds.pkl,Datasets/bci2019/ds.pkl",
+                     //"--dataset_path", "Datasets/bci2019/",
                      //"--dataset_path", "Datasets/bci2017/ds.pkl",
-                     "--epochs", "201",
-                     "--batch_size", "32",
+                     //"--dataset_path", "Datasets/physionet/ds.pkl",
+                     //"--dataset_path", "Datasets/physionet/ds.pkl,Datasets/bci2017/ds.pkl",
+                     "--epochs", "401",
+                     "--batch_size", "256",
                      "--deterministic", "False",
                      "--num_runs", "1",
                      //"--dataset_path", "Datasets/BCICIV_2a_mat/",
@@ -169,7 +174,7 @@
                      //"--train_subjects", "43,44,45,46,47,48,49,50,51,52",  // downstream subjects for fine-tuning
                      "--random_pretrain_subjects", "False",
                      "--valid_subject", "1",    // TODO: this should support a list of subjects
-                     "--test_subject", "43",    // TODO: this should support a list of subjects
+                     "--test_subject", "1",    // TODO: this should support a list of subjects
                      //"--plot_file", "scripts/logs/bci2017_eegconformer/version_23/metrics.csv"
             ]
         },
