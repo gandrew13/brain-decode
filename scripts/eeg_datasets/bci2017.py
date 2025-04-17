@@ -217,6 +217,9 @@ class BCI2017(EEGDataset):
             right_hand_raw_array = mne.io.RawArray(right_hand_trials, info)
             #raw_array = mne.io.RawArray(all_trials, info)
 
+            left_hand_raw_array = left_hand_raw_array.set_eeg_reference()
+            right_hand_raw_array = right_hand_raw_array.set_eeg_reference()
+
             #left_hand_raw_array = left_hand_raw_array.pick(['FC3', 'FC1', 'C1', 'C3', 'C5', 'CP3', 'CP1', 'P1', 'POz', 'Pz', 'CPz', 'Fz', 'FC4', 'FC2', 'Cz', 'C2', 'C4', 'C6', 'CP4', 'CP2', 'P2'])
             #right_hand_raw_array = right_hand_raw_array.pick(['FC3', 'FC1', 'C1', 'C3', 'C5', 'CP3', 'CP1', 'P1', 'POz', 'Pz', 'CPz', 'Fz', 'FC4', 'FC2', 'Cz', 'C2', 'C4', 'C6', 'CP4', 'CP2', 'P2'])
             #raw_array = raw_array.pick(['FC3', 'FC1', 'C1', 'C3', 'C5', 'CP3', 'CP1', 'P1', 'POz', 'Pz', 'CPz', 'Fz', 'FC4', 'FC2', 'Cz', 'C2', 'C4', 'C6', 'CP4', 'CP2', 'P2', 'misc'])

@@ -83,11 +83,14 @@ class PhysioNet(EEGDataset):
                 run_filepath = raw[run_id].filenames[0]
                 is_hand_imagery_run = True in [run in run_filepath for run in hand_imagery_runs]
                 if is_hand_imagery_run:
+                    data = data.set_eeg_reference()
                     runs.append(data)
             
             # concat the 3 hand imagery runs
             # TODO: not sure if I should do this, not sure if the events are concatenated correctly, to check
             raw = mne.concatenate_raws(runs, preload = True)
+
+            #raw = raw.set_eeg_reference()
 
             #print(raw.ch_names)
             selected_channels = mne.pick_channels(raw.info.ch_names, include=['FC3', 'FC1', 'C1', 'C3', 'C5', 'CP3', 'CP1', 'P1', 'POz', 'Pz', 'CPz', 'Fz', 'FC4', 'FC2', 'Cz', 'C2', 'C4', 'C6', 'CP4', 'CP2', 'P2'])  # 21 channels common to BCI2017, BCI2019 and BCI IV 2a datasets

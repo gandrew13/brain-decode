@@ -105,8 +105,11 @@ class BCIIV2a(EEGDataset):
         train_runs = []
         test_runs = []
         for i in range(0, 6):   # 6 runs in total
-            train_runs.append(raw['0train'][str(i)])
-            test_runs.append(raw['1test'][str(i)])
+            train_run = raw['0train'][str(i)].set_eeg_reference()
+            test_run = raw['1test'][str(i)].set_eeg_reference()
+            
+            train_runs.append(train_run)
+            test_runs.append(test_run)
             
         # concat the 6 runs, not sure if I should do this, not sure if the events are concatenated correctly
         train_raw = mne.concatenate_raws(train_runs, preload = True)

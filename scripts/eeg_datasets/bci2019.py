@@ -203,6 +203,9 @@ class BCI2019(EEGDataset):
         
         train_raw = mne.io.RawArray(train_raw, info)
         test_raw = mne.io.RawArray(test_raw, info)
+
+        train_raw = train_raw.set_eeg_reference()
+        test_raw = test_raw.set_eeg_reference()
         
         montage = mne.channels.make_standard_montage("standard_1005")
         train_raw.set_montage(montage)
