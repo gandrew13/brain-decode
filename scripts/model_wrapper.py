@@ -165,12 +165,12 @@ class LModelWrapper(L.LightningModule):
         inputs, labels = batch
         inputs, labels = inputs.type(cuda.FloatTensor), labels[0].type(cuda.LongTensor)
         out = self.model(inputs)
-        self.batch_logits.append(out)
+        self.batch_logits.append(out.squeeze(-1))
         self.batch_labels.append(labels)
 
     def compute_accuracy(self, metric):
         self.model.eval()
-        logits = torch.argmax(torch.cat(self.batch_logits), dim=1)
+        logits = torch.cat([torch.sigmoid(logit) for logit in self.batch_logits])
         labels = torch.cat(self.batch_labels)
 
         self.batch_logits = []
